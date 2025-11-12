@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -30,7 +29,7 @@ model User {
   email            String    @unique
   name             String
   role             Role      @default(CLIENT)
-  hourlyRate       Decimal   @db.Decimal(10, 2)
+  hourlyRate       Decimal?  @db.Decimal(10, 2)
   slots            Slot[]    @relation("UserSlots")
   bookingsMade     Booking[] @relation("UserBookings")
   bookingsReceived Booking[] @relation("ProviderBookings")
@@ -55,7 +54,7 @@ model Slot {
   status     SLOTSTATUS @default(AVAILABLE)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-  booking    Booking?   @relation("BookedSlot")
+  bookings   Booking[]  @relation("BookedSlot")
 
   @@map("slots")
 }
@@ -63,7 +62,7 @@ model Slot {
 model Booking {
   id         String        @id @default(uuid())
   slot       Slot          @relation("BookedSlot", fields: [slotId], references: [id])
-  slotId     String        @unique
+  slotId     String
   client     User          @relation("UserBookings", fields: [clientId], references: [id])
   clientId   String
   provider   User          @relation("ProviderBookings", fields: [providerId], references: [id])

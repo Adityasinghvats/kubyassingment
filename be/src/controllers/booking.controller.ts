@@ -1,12 +1,14 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { prisma } from "../utils/db.js";
-import { logger } from "../utils/logger.js";
-import { ApiError } from "../utils/apiError.js";
-import { ApiResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler";
+import { prisma } from "../utils/db";
+import { logger } from "../utils/logger";
+import { ApiError } from "../utils/apiError";
+import { ApiResponse } from "../utils/apiResponse";
+import { Request, Response } from "express";
+import { Decimal } from "@prisma/client/runtime/library";
 
 
-const createBooking = asyncHandler(async (req, res) => {
-    const { slotId } = req.body;
+const createBooking = asyncHandler(async (req: Request, res: Response) => {
+    const { slotId, finalCost } = req.body;
 
     if (!slotId) {
         logger.error('Booking creation failed: slotId is required');
@@ -31,9 +33,14 @@ const createBooking = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Slot is not available');
     }
 
-    // Calculate final cost (hourlyRate * duration in hours)
-    const durationInHours = slot.duration / 60;
-    const finalCost = slot.user.hourlyRate * durationInHours;
+    let parsedFinalCost: Decimal | undefined = undefined;
+    if (finalCost) {
+        if (isNaN(parseFloat(finalCost))) {
+            logger.error(`Slot booking failed: Invalid final cost ${finalCost}`);
+            throw new ApiError(400, 'Invalid final cost specified');
+        }
+        parsedFinalCost = new Decimal(finalCost);
+    }
 
     // Create booking and update slot in a transaction
     const booking = await prisma.$transaction(async (tx) => {
@@ -47,9 +54,9 @@ const createBooking = asyncHandler(async (req, res) => {
         return tx.booking.create({
             data: {
                 slotId,
-                clientId: req.user.id,
+                clientId: req?.user.id,
                 providerId: slot.providerId,
-                finalCost,
+                finalCost: parsedFinalCost || new Decimal(0),
                 status: 'PENDING'
             },
             include: {
@@ -81,7 +88,7 @@ const createBooking = asyncHandler(async (req, res) => {
 });
 
 
-const getMyBookings = asyncHandler(async (req, res) => {
+const getMyBookings = asyncHandler(async (req: Request, res: Response) => {
     const isClient = req.user.role === 'CLIENT';
 
     const bookings = await prisma.booking.findMany({
@@ -115,7 +122,7 @@ const getMyBookings = asyncHandler(async (req, res) => {
 
 });
 
-const cancelBooking = asyncHandler(async (req, res) => {
+const cancelBooking = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const booking = await prisma.booking.findUnique({
@@ -174,7 +181,7 @@ const cancelBooking = asyncHandler(async (req, res) => {
     res.json(new ApiResponse(200, { booking: updatedBooking }, 'Booking cancelled successfully'));
 });
 
-const completeBooking = asyncHandler(async (req, res) => {
+const completeBooking = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     const booking = await prisma.booking.findUnique({

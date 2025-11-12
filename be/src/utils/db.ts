@@ -1,10 +1,12 @@
-import { PrismaClient } from "../generated/prisma/client.ts";
+import { PrismaClient } from "../generated/prisma/client";
 
 // PrismaClient is attached to the `global` object in development to prevent
 // exhausting your database connection limit.
-const globalForPrisma = global;
+type GlobalForPrisma = typeof globalThis & { prisma?: PrismaClient };
 
-export const prisma = globalForPrisma.prisma || new PrismaClient({
+const globalForPrisma = global as GlobalForPrisma;
+
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
 });
 

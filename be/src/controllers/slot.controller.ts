@@ -1,10 +1,23 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { prisma } from "../utils/db.js";
-import { logger } from "../utils/logger.js";
-import { ApiError } from "../utils/apiError.js";
-import { ApiResponse } from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler";
+import { prisma } from "../utils/db";
+import { logger } from "../utils/logger";
+import { ApiError } from "../utils/apiError";
+import { ApiResponse } from "../utils/apiResponse";
+import { Request, Response } from "express";
 
-const createSlot = asyncHandler(async (req, res) => {
+interface CreateSlotBody {
+    startTime: string;
+    endTime: string;
+    duration: string;
+}
+
+interface GetSlotsQuery {
+    providerId?: string;
+    status?: string;
+}
+
+
+const createSlot = asyncHandler(async (req: Request<{}, {}, CreateSlotBody>, res: Response) => {
     const { startTime, endTime, duration } = req.body;
 
     if (!startTime || !endTime || !duration) {
@@ -34,8 +47,9 @@ const createSlot = asyncHandler(async (req, res) => {
     res.status(201).json(new ApiResponse(201, { slot }, 'Slot created successfully'));
 });
 
-const getSlots = asyncHandler(async (req, res) => {
-    const { providerId, status = 'AVAILABLE' } = req.query;
+const getSlots = asyncHandler(async (req: Request<{}, {}, {}, GetSlotsQuery>, res: Response) => {
+    const { status = 'AVAILABLE' } = req.query;
+    const { providerId } = req.params;
 
     if (status && !['AVAILABLE', 'BOOKED'].includes(status)) {
         throw new ApiError(400, 'Invalid status filter');
@@ -48,7 +62,7 @@ const getSlots = asyncHandler(async (req, res) => {
     const slots = await prisma.slot.findMany({
         where: {
             ...(providerId && { providerId }),
-            ...(status && { status })
+            ...(status && { status: status as unknown as any })
         },
         include: {
             user: {
@@ -70,13 +84,13 @@ const getSlots = asyncHandler(async (req, res) => {
 });
 
 
-const getMySlots = asyncHandler(async (req, res) => {
+const getMySlots = asyncHandler(async (req: Request, res: Response) => {
     const slots = await prisma.slot.findMany({
         where: {
             providerId: req.user.id
         },
         include: {
-            booking: {
+            bookings: {
                 include: {
                     client: {
                         select: {
@@ -97,7 +111,7 @@ const getMySlots = asyncHandler(async (req, res) => {
 });
 
 
-const deleteSlot = asyncHandler(async (req, res) => {
+const deleteSlot = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
     if (!id) {

@@ -1,12 +1,14 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { prisma } from "../utils/db.js";
-import { logger } from "../utils/logger.js";
-import { ApiError } from "../utils/apiError.js";
-import { ApiResponse } from "../utils/apiResponse.js";
-import { auth } from "../utils/auth.js";
+import { asyncHandler } from "../utils/asyncHandler";
+import { prisma } from "../utils/db";
+import { logger } from "../utils/logger";
+import { ApiError } from "../utils/apiError";
+import { ApiResponse } from "../utils/apiResponse";
+import { auth } from "../utils/auth";
+import { Request, Response } from "express";
+import { Decimal } from "@prisma/client/runtime/library";
 
 
-const registerUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler(async (req: Request, res: Response) => {
     const { email, password, name, role, hourlyRate } = req.body;
 
     if (!email || !password || !name) {
@@ -26,14 +28,18 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Invalid role specified');
     }
 
-    if (hourlyRate && isNaN(parseFloat(hourlyRate))) {
-        logger.error(`User sign-up failed: Invalid hourly rate ${hourlyRate}`);
-        throw new ApiError(400, 'Invalid hourly rate specified');
+    let parsedHourlyRate: Decimal | undefined = undefined;
+    if (hourlyRate) {
+        if (isNaN(parseFloat(hourlyRate))) {
+            logger.error(`User sign-up failed: Invalid hourly rate ${hourlyRate}`);
+            throw new ApiError(400, 'Invalid hourly rate specified');
+        }
+        parsedHourlyRate = new Decimal(hourlyRate);
     }
 
     // first create user in better-auth
     const result = await auth.api.signUpEmail({
-        body: { email, password, name }
+        body: { email, password, name, role }
     })
 
     // add additional fields in our own database
@@ -41,8 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
         await prisma.user.update({
             where: { id: result.user.id },
             data: {
-                role,
-                hourlyRate
+                hourlyRate: parsedHourlyRate
             }
         });
     }
@@ -50,7 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
     return res.status(201).json(new ApiResponse(201, { result }, 'User registered successfully'));
 })
 
-const getCurrentUser = asyncHandler(async (req, res) => {
+const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({
         where: { id: req.user.id },
         select: {
@@ -73,7 +78,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 })
 
-const updateCurrentUser = asyncHandler(async (req, res) => {
+const updateCurrentUser = asyncHandler(async (req: Request, res: Response) => {
     const { name, hourlyRate } = req.body;
 
     if (hourlyRate && isNaN(parseFloat(hourlyRate))) {
@@ -100,7 +105,7 @@ const updateCurrentUser = asyncHandler(async (req, res) => {
     return res.json(new ApiResponse(200, { user: updatedUser }, 'User profile updated successfully'));
 });
 
-const getProviders = asyncHandler(async (req, res) => {
+const getProviders = asyncHandler(async (req: Request, res: Response) => {
     const providers = await prisma.user.findMany({
         where: { role: 'PROVIDER' },
         select: {
@@ -118,6 +123,7 @@ const getProviders = asyncHandler(async (req, res) => {
 
     res.json(new ApiResponse(200, { providers }, 'Providers fetched successfully'));
 });
+
 
 export {
     registerUser,

@@ -1,7 +1,7 @@
-import { app } from "./app.js";
+import { app } from "./app";
 import dotenv from "dotenv";
-import { logger } from "./utils/logger.js";
-import { prisma } from "./utils/db.js";
+import { logger } from "./utils/logger";
+import { prisma } from "./utils/db";
 
 dotenv.config({
     path: './.env'

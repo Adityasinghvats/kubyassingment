@@ -1,10 +1,17 @@
-import logger from "../utils/logger.js";
+import { logger } from "../utils/logger";
+import { Request, Response, NextFunction } from "express";
+import { ApiError } from "../utils/apiError";
 
-const errorHandler = (err, req, res, next) => {
+interface CustomError extends Error {
+    statusCode?: number;
+    errors?: string[];
+}
+
+const errorHandler = (err: CustomError, req: Request, res: Response, next: NextFunction) => {
     let error = err
     if (!(error instanceof ApiError)) {
 
-        const statusCode = error.statusCode;
+        const statusCode = error?.statusCode || 500;
 
         const message = error.message || "Something went wrong"
 
@@ -18,7 +25,7 @@ const errorHandler = (err, req, res, next) => {
         ...(process.env.NODE_ENV === "development" ? { stack: error.stack } : {})
     }
 
-    return res.status(error.statusCode).json(response)
+    return res.status(error.statusCode || 500).json(response)
 }
 
 export { errorHandler }

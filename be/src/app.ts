@@ -1,19 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import { toNodeHandler } from 'better-auth/node';
-import { auth } from './utils/auth.js';
-import userRoutes from './routes/userRoutes.js';
-import slotRoutes from './routes/slotRoutes.js';
-import bookingRoutes from './routes/bookingRoutes.js';
-import { errorHandler } from './middleware/errorMiddleware.js';
-import { logger } from './utils/logger.js';
+import { auth } from './utils/auth';
+import { errorHandler } from './middleware/errorMiddleware';
+import { logger } from './utils/logger';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './utils/swagger.js';
+import { swaggerSpec } from './utils/swagger';
 
 const app = express();
 
-app.all('/api/auth/*', toNodeHandler(auth));
+app.all('/api/auth/*splat', toNodeHandler(auth));
 
 app.use(express.json());
 
@@ -25,6 +22,10 @@ app.use(
     })
 );
 
+
+import userRoutes from './routes/user.router';
+import slotRoutes from './routes/slot.router';
+import bookingRoutes from './routes/booking.router';
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/slots', slotRoutes);
