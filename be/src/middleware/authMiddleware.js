@@ -1,17 +1,16 @@
 import { auth } from '../utils/auth.js';
+import prisma from "../utils/db.js";
+import { ApiError } from '../utils/apiError.js';
+import { logger } from '../utils/logger.js';
 
-
-export async function requireAuth(req, res, next) {
+export async function requireAuth(req, _, next) {
     try {
         const session = await auth.api.getSession({
             headers: req.headers
         });
 
         if (!session) {
-            return res.status(401).json({
-                error: 'Unauthorized',
-                message: 'You must be logged in to access this resource'
-            });
+            throw new ApiError(401, 'Unauthorized', 'You must be logged in');
         }
 
         req.user = session.user;
@@ -19,11 +18,8 @@ export async function requireAuth(req, res, next) {
 
         next();
     } catch (error) {
-        console.error('Auth middleware error:', error);
-        return res.status(401).json({
-            error: 'Unauthorized',
-            message: 'Invalid or expired session'
-        });
+        logger.error('Auth middleware error:', error);
+        throw new ApiError(401, 'Unauthorized', 'Invalid session');
     }
 }
 
@@ -35,53 +31,28 @@ export function requireRole(...roles) {
             });
 
             if (!session) {
-                return res.status(401).json({
-                    error: 'Unauthorized',
-                    message: 'You must be logged in'
-                });
+                throw new ApiError(401, 'Unauthorized', 'You must be logged in');
             }
 
             // Attach user to request
             req.user = session.user;
             req.session = session.session;
 
-            // Check role (you'll need to fetch full user from DB for role)
-            // For now, we'll assume role is in session.user
-            if (!roles.includes(req.user.role)) {
-                return res.status(403).json({
-                    error: 'Forbidden',
-                    message: `This action requires one of these roles: ${roles.join(', ')}`
-                });
+            // Fetch user from database to get the latest role info
+            const user = await prisma.user.findUnique({
+                where: { id: req.user.id }
+            });
+
+
+            if (!roles.includes(user.role)) {
+                throw new ApiError(403, 'Forbidden', `This action requires one of these roles: ${roles.join(', ')}`);
             }
 
             next();
         } catch (error) {
-            console.error('Role check error:', error);
-            return res.status(401).json({
-                error: 'Unauthorized',
-                message: 'Invalid session'
-            });
+            logger.error('Role check error:', error);
+            throw new ApiError(403, 'Forbidden', 'Access denied');
         }
     };
 }
 
-/**
- * Optional auth - attaches user if logged in, but doesn't require it
- */
-export async function optionalAuth(req, res, next) {
-    try {
-        const session = await auth.api.getSession({
-            headers: req.headers
-        });
-
-        if (session) {
-            req.user = session.user;
-            req.session = session.session;
-        }
-
-        next();
-    } catch (error) {
-        // Continue even if auth fails
-        next();
-    }
-}
