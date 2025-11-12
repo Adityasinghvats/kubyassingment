@@ -1,0 +1,122 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PROVIDER
+  CLIENT
+}
+
+enum SLOTSTATUS {
+  AVAILABLE
+  BOOKED
+}
+
+enum BOOKINGSTATUS {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String
+  role             Role      @default(CLIENT)
+  hourlyRate       Decimal   @db.Decimal(10, 2)
+  slots            Slot[]    @relation("UserSlots")
+  bookingsMade     Booking[] @relation("UserBookings")
+  bookingsReceived Booking[] @relation("ProviderBookings")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  emailVerified Boolean   @default(false)
+  image         String?
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("users")
+}
+
+model Slot {
+  id         String     @id @default(uuid())
+  user       User       @relation("UserSlots", fields: [providerId], references: [id])
+  providerId String
+  startTime  DateTime
+  endTime    DateTime
+  duration   Int
+  status     SLOTSTATUS @default(AVAILABLE)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  booking    Booking?   @relation("BookedSlot")
+
+  @@map("slots")
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  slot       Slot          @relation("BookedSlot", fields: [slotId], references: [id])
+  slotId     String        @unique
+  client     User          @relation("UserBookings", fields: [clientId], references: [id])
+  clientId   String
+  provider   User          @relation("ProviderBookings", fields: [providerId], references: [id])
+  providerId String
+  finalCost  Decimal       @db.Decimal(10, 2)
+  status     BOOKINGSTATUS @default(PENDING)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@map("bookings")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
