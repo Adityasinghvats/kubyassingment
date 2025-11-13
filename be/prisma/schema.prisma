@@ -24,12 +24,26 @@ enum BOOKINGSTATUS {
   CANCELLED
 }
 
+enum CATEGORY {
+  PLUMBING
+  ELECTRICAL
+  CARPENTRY
+  CLEANING
+  TUTORING
+  CONSULTING
+  HEALTHCARE
+  LEGAL
+  OTHER
+}
+
 model User {
   id               String    @id @default(uuid())
   email            String    @unique
   name             String
   role             Role      @default(CLIENT)
   hourlyRate       Decimal?  @db.Decimal(10, 2)
+  description      String?
+  category         CATEGORY? @default(OTHER)
   slots            Slot[]    @relation("UserSlots")
   bookingsMade     Booking[] @relation("UserBookings")
   bookingsReceived Booking[] @relation("ProviderBookings")
@@ -60,17 +74,18 @@ model Slot {
 }
 
 model Booking {
-  id         String        @id @default(uuid())
-  slot       Slot          @relation("BookedSlot", fields: [slotId], references: [id])
-  slotId     String
-  client     User          @relation("UserBookings", fields: [clientId], references: [id])
-  clientId   String
-  provider   User          @relation("ProviderBookings", fields: [providerId], references: [id])
-  providerId String
-  finalCost  Decimal       @db.Decimal(10, 2)
-  status     BOOKINGSTATUS @default(PENDING)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id          String        @id @default(uuid())
+  slot        Slot          @relation("BookedSlot", fields: [slotId], references: [id])
+  slotId      String
+  client      User          @relation("UserBookings", fields: [clientId], references: [id])
+  clientId    String
+  provider    User          @relation("ProviderBookings", fields: [providerId], references: [id])
+  providerId  String
+  finalCost   Decimal       @db.Decimal(10, 2)
+  description String?
+  status      BOOKINGSTATUS @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@map("bookings")
 }

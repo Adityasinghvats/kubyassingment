@@ -8,7 +8,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 
 
 const createBooking = asyncHandler(async (req: Request, res: Response) => {
-    const { slotId, finalCost } = req.body;
+    const { slotId, finalCost, description } = req.body;
 
     if (!slotId) {
         logger.error('Booking creation failed: slotId is required');
@@ -57,7 +57,8 @@ const createBooking = asyncHandler(async (req: Request, res: Response) => {
                 clientId: req?.user.id,
                 providerId: slot.providerId,
                 finalCost: parsedFinalCost || new Decimal(0),
-                status: 'PENDING'
+                status: 'PENDING',
+                description: description || ''
             },
             include: {
                 slot: {

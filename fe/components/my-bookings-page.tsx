@@ -6,16 +6,14 @@ import { useRouter } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { bookingAPI } from "@/services/bookingService"
 import { useAuth } from "@/hooks/use-auth"
+import { formatDate, formatDuration, formatTime } from "@/lib/format"
 
 interface MyBookingsPageProps {
   bookings: Booking[]
 }
 
 export default function MyBookingsPage({ bookings }: MyBookingsPageProps) {
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00")
-    return date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })
-  }
+
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -79,13 +77,17 @@ export default function MyBookingsPage({ bookings }: MyBookingsPageProps) {
       <div className="space-y-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3">
           <Calendar className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-          <span className="text-sm text-slate-700 dark:text-slate-300">{(booking.slot.startTime)}</span>
+          <span className="text-sm text-slate-700 dark:text-slate-300">{formatDate(booking.slot.startTime)}</span>
         </div>
         <div className="flex items-center gap-3">
           <Clock className="w-4 h-4 text-slate-600 dark:text-slate-400" />
           <span className="text-sm text-slate-700 dark:text-slate-300">
-            {booking.slot.startTime} · {booking.slot.duration} minutes
+            {formatTime(booking.slot.startTime)} · {formatTime(booking.slot.endTime)} ({formatDuration(booking.slot.duration)})
           </span>
+        </div>
+        <div>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Description</p>
+          <p className="text-lg font-bold text-slate-900 dark:text-white">{booking?.description}</p>
         </div>
       </div>
 
@@ -94,6 +96,9 @@ export default function MyBookingsPage({ bookings }: MyBookingsPageProps) {
           <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">Total Cost</p>
           <p className="text-lg font-bold text-slate-900 dark:text-white">${booking.finalCost}</p>
         </div>
+
+      </div>
+      <div className="flex flex-row gap-2 mt-4">
         {canCancel && (
           <button
             onClick={() => handleCancelBooking(booking.id)}
@@ -133,7 +138,7 @@ export default function MyBookingsPage({ bookings }: MyBookingsPageProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {upcomingBookings.map((booking) => (
-              <BookingCard key={booking.id} booking={booking} canCancel={user?.role === "PROVIDER" ? false : true} canComplete={user?.role === "PROVIDER" ? true : false} />
+              <BookingCard key={booking.id} booking={booking} canCancel={true} canComplete={user?.role === "PROVIDER" ? true : false} />
             ))}
           </div>
         </div>

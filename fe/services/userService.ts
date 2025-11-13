@@ -83,9 +83,9 @@ export const userAPI = {
         return response.json();
     },
 
-    updateProfile: async (data: { name?: string; hourlyRate?: string; }) => {
-        const response = await fetch(`${BACKEND_URL}/api/users/me`, {
-            method: 'PUT',
+    updateProfile: async (data: Partial<SignUpData>) => {
+        const response = await fetch(`${BACKEND_URL}/api/v1/users/me`, {
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify(data),

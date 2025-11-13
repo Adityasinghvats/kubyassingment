@@ -5,8 +5,8 @@ export interface User {
     hourlyRate?: string;
     role?: 'PROVIDER' | 'CLIENT';
     image?: string;
-    category?: string;
-    bio?: string;
+    category?: Category;
+    description?: string;
     _count?: { slot: number }
 }
 
@@ -16,9 +16,23 @@ export interface SignUpData {
     name: string;
     role?: 'PROVIDER' | 'CLIENT';
     hourlyRate?: string;
+    category?: Category;
+    description?: string;
 }
 
 export interface SignInData {
     email: string;
     password: string;
+}
+
+export enum Category {
+    PLUMBING = 'PLUMBING',
+    ELECTRICAL = 'ELECTRICAL',
+    CARPENTRY = 'CARPENTRY',
+    CLEANING = 'CLEANING',
+    TUTORING = 'TUTORING',
+    CONSULTING = 'CONSULTING',
+    HEALTHCARE = 'HEALTHCARE',
+    LEGAL = 'LEGAL',
+    OTHER = 'OTHER',
 }

@@ -17,9 +17,11 @@ export interface Booking {
     };
     slot: Slot;
     provider: User;
+    description?: string;
 }
 
 export interface CreateBookingDTO {
     slotId: string;
     finalCost: string;
+    description?: string;
 }

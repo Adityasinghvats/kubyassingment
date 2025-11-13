@@ -9,7 +9,7 @@ import { Decimal } from "@prisma/client/runtime/library";
 
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password, name, role, hourlyRate } = req.body;
+    const { email, password, name, role, hourlyRate, description, category } = req.body;
 
     if (!email || !password || !name) {
         logger.error('User sign-up failed: Missing required fields');
@@ -47,7 +47,9 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
         await prisma.user.update({
             where: { id: result.user.id },
             data: {
-                hourlyRate: parsedHourlyRate
+                hourlyRate: parsedHourlyRate,
+                description: description || null,
+                category: category || 'OTHER'
             }
         });
     }
@@ -63,6 +65,8 @@ const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
             email: true,
             name: true,
             role: true,
+            description: true,
+            category: true,
             hourlyRate: true,
             emailVerified: true,
             image: true,
@@ -79,7 +83,7 @@ const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const updateCurrentUser = asyncHandler(async (req: Request, res: Response) => {
-    const { name, hourlyRate } = req.body;
+    const { name, hourlyRate, description, category } = req.body;
 
     if (hourlyRate && isNaN(parseFloat(hourlyRate))) {
         logger.error(`User profile update failed: Invalid hourly rate ${hourlyRate}`);
@@ -90,13 +94,17 @@ const updateCurrentUser = asyncHandler(async (req: Request, res: Response) => {
         where: { id: req.user.id },
         data: {
             ...(name && { name }),
-            ...(hourlyRate && { hourlyRate: parseFloat(hourlyRate) })
+            ...(hourlyRate && { hourlyRate: parseFloat(hourlyRate) }),
+            ...(description !== undefined && { description }),
+            ...(category && { category })
         },
         select: {
             id: true,
             email: true,
             name: true,
             role: true,
+            description: true,
+            category: true,
             hourlyRate: true,
             emailVerified: true,
             image: true
@@ -112,6 +120,8 @@ const getProviders = asyncHandler(async (req: Request, res: Response) => {
             id: true,
             name: true,
             hourlyRate: true,
+            description: true,
+            category: true,
             image: true,
             _count: {
                 select: {

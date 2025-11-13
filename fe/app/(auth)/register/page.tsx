@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
+import { Category, SignUpData } from "@/interfaces/user/interface";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -14,8 +15,11 @@ export default function RegisterPage() {
         password: "",
         name: "",
         role: "CLIENT" as "CLIENT" | "PROVIDER",
+        category: Category.OTHER,
+        description: "",
         hourlyRate: "0.00",
     });
+    const { signUp } = useAuth();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,14 +27,17 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
-            const { signUp } = useAuth();
-            await signUp({
+            const payload: SignUpData = {
                 email: formData.email,
                 password: formData.password,
                 name: formData.name,
                 role: formData.role,
                 hourlyRate: formData.role === "PROVIDER" ? formData.hourlyRate : undefined,
-            });
+                description: formData.role === "PROVIDER" ? formData.description : undefined,
+                category: formData.role === "PROVIDER" ? formData.category : undefined,
+            };
+            console.log("Registering user with data:", payload);
+            await signUp(payload);
             router.push("/");
         } catch (err: any) {
             setError(err.message || "Sign up failed");
@@ -139,6 +146,45 @@ export default function RegisterPage() {
                                     className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                                     placeholder="50.00"
                                 />
+                            </div>
+                        )}
+                        {formData.role === "PROVIDER" && (
+                            <div>
+                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description
+                                </label>
+                                <input
+                                    id="description"
+                                    name="description"
+                                    type="text"
+                                    required
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                    placeholder="Experienced plumber with 5 years in residential repairs"
+                                />
+                            </div>
+                        )}
+                        {formData.role === "PROVIDER" && (
+                            <div>
+                                <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Category
+                                </label>
+                                <select
+                                    id="category"
+                                    name="category"
+                                    required
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value as Category })}
+                                    className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+
+                                >
+                                    {Object.values(Category).map((cat) => (
+                                        <option key={cat} value={cat}>
+                                            {cat.charAt(0) + cat.slice(1).toLowerCase()}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                         )}
                     </div>

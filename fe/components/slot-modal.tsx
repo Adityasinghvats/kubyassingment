@@ -17,13 +17,12 @@ export default function SlotModal({ onClose }: BookingModalProps) {
     const [isAdded, setIsAdded] = useState(false)
     const [startTime, setStartTime] = useState<Dayjs | null>(dayjs());
     const [endTime, setEndTime] = useState<Dayjs | null>(dayjs().add(1, 'hour'));
-
     const queryClient = useQueryClient();
 
     const { mutate: createSlot, isPending: isAdding } = useMutation({
         mutationFn: slotAPI.addSlot,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["bookings"] });
+            queryClient.invalidateQueries({ queryKey: ["slots"] });
             setIsAdded(true);
         },
         onError: (error: Error) => {
@@ -41,11 +40,10 @@ export default function SlotModal({ onClose }: BookingModalProps) {
             if (duration <= 0) {
                 throw new Error("End time must be after start time");
             }
-
             console.log("Sending to API:", {
                 startTime: formattedStartTime,
                 endTime: formattedEndTime,
-                duration: duration,
+                duration: formattedDuration,
             });
             createSlot({
                 startTime: formattedStartTime!,
@@ -84,13 +82,6 @@ export default function SlotModal({ onClose }: BookingModalProps) {
                                 <p className="font-semibold text-slate-900 dark:text-white">{endTime?.format('YYYY-MM-DD HH:mm')}</p>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-blue-200 dark:border-blue-800">
-                            <div>
-                                <p className="text-sm text-slate-600 dark:text-slate-400">Duration</p>
-                                <p className="font-semibold text-slate-900 dark:text-white"> min</p>
-                            </div>
-
-                        </div>
                     </div>
 
                     <button
@@ -111,7 +102,7 @@ export default function SlotModal({ onClose }: BookingModalProps) {
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
+                <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">Add Slot</h2>
                     <button
                         onClick={onClose}
@@ -126,7 +117,7 @@ export default function SlotModal({ onClose }: BookingModalProps) {
                     {/* Booking Details */}
                     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-3 border border-blue-200 dark:border-blue-800">
                         <div className="flex flex-row gap-4">
-                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" /> <p>Start Time</p>
+                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" /> <p>Start Time</p>
                         </div>
 
                         <div className="flex items-start gap-3">
@@ -140,7 +131,7 @@ export default function SlotModal({ onClose }: BookingModalProps) {
                         </div>
 
                         <div className="flex flex-row gap-4">
-                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" /> <p>End Time</p>
+                            <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" /> <p>End Time</p>
                         </div>
                         <div className="flex items-start gap-3 pt-2 dark:border-blue-800">
                             <LocalizationProvider dateAdapter={AdapterDayjs}>

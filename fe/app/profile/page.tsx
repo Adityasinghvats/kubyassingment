@@ -5,25 +5,28 @@ import { useAuth } from "@/hooks/use-auth";
 import {
     User as UserIcon,
     Mail,
-    DollarSign,
-    Calendar,
     Edit2,
-    Save,
-    X,
-    CheckCircle,
-    Clock,
-    Star
+    LogOut,
+    Calendar
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
+import { User } from "@/interfaces/user/interface";
 
 export default function ProfilePage() {
-    const { isLoading, user, session } = useAuth();
+    const { isLoading, signOut } = useAuth();
+    const router = useRouter();
+    const currentUserData = useQuery({
+        queryKey: ["currentUser"],
+        queryFn: () => userService.getCurrentUser()
+    });
 
+    const user: User = currentUserData.data?.data?.user;
 
-
-    if (isLoading) {
+    if (isLoading || currentUserData.isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
                 <div className="text-center space-y-4">
                     <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
                     <p className="text-slate-600 dark:text-slate-400">Loading your profile...</p>
@@ -34,7 +37,7 @@ export default function ProfilePage() {
 
     if (!user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-r from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
                 <div className="text-center space-y-4">
                     <UserIcon className="w-16 h-16 text-slate-400 mx-auto" />
                     <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Not Logged In</h2>
@@ -47,18 +50,18 @@ export default function ProfilePage() {
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-linear-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto space-y-6">
 
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
                     {/* Cover Image */}
-                    <div className="h-32 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+                    <div className="h-32 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
 
                     {/* Profile Content */}
                     <div className="px-6 pb-6">
                         {/* Avatar & Edit Button */}
                         <div className="flex items-end justify-between -mt-16 mb-4">
-                            <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl border-4 border-white dark:border-slate-900 shadow-lg flex items-center justify-center">
+                            <div className="w-32 h-32 bg-linear-to-r from-blue-500 to-indigo-600 rounded-2xl border-4 border-white dark:border-slate-900 shadow-lg flex items-center justify-center">
                                 {user.image ? (
                                     <img src={user.image} alt={user.name} className="w-full h-full rounded-2xl object-cover" />
                                 ) : (
@@ -67,8 +70,6 @@ export default function ProfilePage() {
                                     </span>
                                 )}
                             </div>
-
-
                         </div>
 
                         {/* User Info */}
@@ -77,18 +78,41 @@ export default function ProfilePage() {
                             <>
                                 <div>
                                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{user.name}</h1>
-                                    {user.category && (
-                                        <p className="text-lg text-slate-600 dark:text-slate-400 mt-1">{user.category}</p>
-                                    )}
                                 </div>
 
-                                {user.bio && (
-                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{user.bio}</p>
+                                {user.description && (
+                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{user.description}</p>
                                 )}
                             </>
 
                         </div>
+                        <div className="flex flex-row gap-4 mt-6">
+                            <button
+                                onClick={() => signOut()}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                Logout
+                            </button>
+                            <button
+                                onClick={() => router.push('/profile/edit')}
+                                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                            >
+                                <Edit2 className="w-4 h-4" />
+                                Edit Profile
+                            </button>
+                            {user.role === 'PROVIDER' && (
+                                <button
+                                    onClick={() => router.push('/slots')}
+                                    className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium"
+                                >
+                                    <Calendar className="w-4 h-4" />
+                                    Manage Slots
+                                </button>
+                            )}
+                        </div>
                     </div>
+
                 </div>
 
                 {/* Stats & Info Cards */}

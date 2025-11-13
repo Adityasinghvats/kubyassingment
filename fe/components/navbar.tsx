@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Menu, X, LogIn, LogOut, Calendar } from "lucide-react"
+import { Menu, X, LogIn, LogOut, Calendar, User } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
 
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
   const router = useRouter();
 
   return (
@@ -21,9 +21,9 @@ export default function Navbar() {
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
           >
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">C</span>
+              <span className="text-white font-bold text-lg">O</span>
             </div>
-            <span className="font-bold text-xl text-slate-900 dark:text-white hidden sm:block">ConsultHub</span>
+            <span className="font-bold text-xl text-slate-900 dark:text-white hidden sm:block">WorkBagel</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -48,11 +48,11 @@ export default function Navbar() {
 
             {user ? (
               <button
-                onClick={signOut}
+                onClick={() => router.push('/profile')}
                 className="flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium"
               >
-                <LogOut className="w-4 h-4" />
-                Logout
+                <User className="w-4 h-4" />
+                Profile
               </button>
             ) : (
               <button
@@ -109,13 +109,13 @@ export default function Navbar() {
             )}
             <button
               onClick={() => {
-                if (user) signOut()
+                if (user) router.push('/profile')
                 else router.push('/login')
                 setMobileMenuOpen(false)
               }}
               className="block w-full text-left px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded font-medium"
             >
-              {user ? "Logout" : "Login"}
+              {user ? "Profile" : "Login"}
             </button>
           </div>
         )}

@@ -11,7 +11,7 @@ const router = Router();
 
 router.post('/register', registerUser);
 router.get('/me', requireAuth, getCurrentUser);
-router.put('/me', requireAuth, updateCurrentUser);
+router.patch('/me', requireAuth, updateCurrentUser);
 router.get('/providers', getProviders);
 
 export default router;

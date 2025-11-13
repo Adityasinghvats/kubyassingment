@@ -17,83 +17,42 @@ import SlotModal from "@/components/slot-modal"
 import { slotAPI } from "@/services/slotService"
 import { Slot } from "@/interfaces/slot/interface"
 import { useAuth } from "@/hooks/use-auth"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { formatDate, formatDuration, formatTime } from "@/lib/format"
 
 export default function SlotsPage() {
+    const queryClient = useQueryClient();
     const { user } = useAuth()
     const [showSlotModal, setShowSlotModal] = useState(false)
-    const [slots, setSlots] = useState<Slot[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [deleteLoading, setDeleteLoading] = useState<string | null>(null)
-    const [error, setError] = useState("")
-    const [success, setSuccess] = useState("")
     const [filterStatus, setFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'BOOKED'>('ALL')
     const [searchTerm, setSearchTerm] = useState("")
+    const [deleteSlotId, setDeleteSlotId] = useState<string | null>(null)
 
-    const fetchSlots = async () => {
-        setIsLoading(true)
-        setError("")
-        try {
-            const data = await slotAPI.getMySlots()
-            if (data) {
-                setSlots(data.data.slots)
-            }
-        } catch (err: any) {
-            setError(err.message || "Failed to fetch slots")
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const slotsData = useQuery({
+        queryKey: ["slots"],
+        queryFn: () => slotAPI.getMySlots(),
+        enabled: !!user,
+    })
+    const slots: Slot[] = slotsData.data?.data?.slots || []
 
-    useEffect(() => {
-        fetchSlots()
-    }, [])
+    const { mutate: deleteSlot, isPending: isdeleting } = useMutation({
+        mutationFn: slotAPI.deleteSlotById,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["slots"] });
+        },
+        onError: (error: Error) => {
+            console.error("Error deleting slot:", error);
+        },
+    });
 
-    const handleDelete = async (slotId: string) => {
-        if (!confirm("Are you sure you want to delete this slot?")) return
-
-        setDeleteLoading(slotId)
-        setError("")
-        setSuccess("")
-
-        try {
-            await slotAPI.deleteSlotById(slotId)
-            setSlots(slots.filter(slot => slot.id !== slotId))
-            setSuccess("Slot deleted successfully!")
-            setTimeout(() => setSuccess(""), 3000)
-        } catch (err: any) {
-            setError(err.message || "Failed to delete slot")
-        } finally {
-            setDeleteLoading(null)
-        }
+    const handleDelete = (slotId: string) => {
+        console.log("Deleting slot with ID:", slotId);
+        setDeleteSlotId(slotId)
+        deleteSlot(slotId)
     }
 
     const handleSlotAdded = () => {
         setShowSlotModal(false)
-        fetchSlots()
-    }
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        })
-    }
-
-    const formatTime = (dateString: string) => {
-        return new Date(dateString).toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        })
-    }
-
-    const formatDuration = (minutes: number) => {
-        const hours = Math.floor(minutes / 60)
-        const mins = minutes % 60
-        if (hours > 0 && mins > 0) return `${hours}h ${mins}m`
-        if (hours > 0) return `${hours}h`
-        return `${mins}m`
     }
 
     const filteredSlots = slots.filter(slot => {
@@ -110,9 +69,9 @@ export default function SlotsPage() {
         booked: slots.filter(s => s.status === 'BOOKED').length
     }
 
-    if (isLoading) {
+    if (!slotsData.isError && slotsData.isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
+            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
                 <div className="text-center space-y-4">
                     <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
                     <p className="text-slate-600 dark:text-slate-400">Loading slots...</p>
@@ -122,7 +81,7 @@ export default function SlotsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Header */}
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
@@ -145,21 +104,6 @@ export default function SlotsPage() {
                         </button>
                     </div>
                 </div>
-
-                {/* Notifications */}
-                {success && (
-                    <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4 flex items-center gap-3">
-                        <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
-                        <p className="text-green-800 dark:text-green-300 font-medium">{success}</p>
-                    </div>
-                )}
-
-                {error && (
-                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                        <p className="text-red-800 dark:text-red-300">{error}</p>
-                    </div>
-                )}
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -343,14 +287,21 @@ export default function SlotsPage() {
                                     )}
 
                                     {/* Delete Button */}
-                                    <button
-                                        onClick={() => handleDelete(slot.id)}
-                                        disabled={deleteLoading === slot.id}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed border border-red-200 dark:border-red-800"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        {deleteLoading === slot.id ? 'Deleting...' : 'Delete Slot'}
-                                    </button>
+                                    {slot.status === 'AVAILABLE' && (
+                                        <button
+                                            onClick={() => handleDelete(slot.id)}
+                                            disabled={isdeleting}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed border border-red-200 dark:border-red-800"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                            {slot.id === deleteSlotId ? (
+                                                isdeleting ? 'Deleting...' : 'Delete Slot'
+                                            ) : (
+                                                'Delete Slot'
+                                            )}
+
+                                        </button>
+                                    )}
                                 </div>
 
                                 {/* Metadata Footer */}
