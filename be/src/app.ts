@@ -10,17 +10,17 @@ import { swaggerSpec } from './utils/swagger';
 
 const app = express();
 
-app.all('/api/auth/*splat', toNodeHandler(auth));
-
-app.use(express.json());
-
 app.use(
     cors({
         origin: process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization']
     })
 );
+
+app.all('/api/auth/*splat', toNodeHandler(auth));
+app.use(express.json());
 
 
 import userRoutes from './routes/user.router';

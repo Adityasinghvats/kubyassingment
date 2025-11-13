@@ -2,44 +2,37 @@
 
 import { useState } from "react"
 import { X, Calendar, Clock, DollarSign, CheckCircle } from "lucide-react"
+import { Slot } from "@/interfaces/slot/interface"
+import { User } from "@/interfaces/user/interface";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { bookingAPI } from "@/services/bookingService";
 
-interface Slot {
-  id: string
-  date: string
-  time: string
-  duration: number
-}
-
-interface Provider {
-  id: string
-  name: string
-  specialty: string
-  hourlyRate: number
-}
 
 interface BookingModalProps {
-  slot: Slot
-  provider: Provider
-  cost: number
+  slot: Slot;
+  provider?: User;
+  cost: number;
   onClose: () => void
 }
 
 export default function BookingModal({ slot, provider, cost, onClose }: BookingModalProps) {
-  const [isBooking, setIsBooking] = useState(false)
   const [isBooked, setIsBooked] = useState(false)
+  const queryClient = useQueryClient();
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + "T00:00:00")
-    return date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
-  }
+  const { mutate: createBooking, isPending: isBooking } = useMutation({
+    mutationFn: bookingAPI.addBooking,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      setIsBooked(true);
+    },
+    onError: (error: Error) => {
+      console.error("Error creating booking request:", error);
+      setIsBooked(false);
+    },
+  });
 
   const handleBook = async () => {
-    setIsBooking(true)
-    // Simulate booking process
-    setTimeout(() => {
-      setIsBooking(false)
-      setIsBooked(true)
-    }, 1500)
+    createBooking({ slotId: slot.id, finalCost: cost.toString() });
   }
 
   if (isBooked) {
@@ -60,17 +53,14 @@ export default function BookingModal({ slot, provider, cost, onClose }: BookingM
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-left space-y-3 border border-blue-200 dark:border-blue-800">
             <div>
               <p className="text-sm text-slate-600 dark:text-slate-400">Provider</p>
-              <p className="font-semibold text-slate-900 dark:text-white">{provider.name}</p>
+              <p className="font-semibold text-slate-900 dark:text-white">{provider?.name}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-slate-600 dark:text-slate-400">Date</p>
-                <p className="font-semibold text-slate-900 dark:text-white">{formatDate(slot.date)}</p>
+                <p className="font-semibold text-slate-900 dark:text-white">{slot.startTime}-{slot.endTime}</p>
               </div>
-              <div>
-                <p className="text-sm text-slate-600 dark:text-slate-400">Time</p>
-                <p className="font-semibold text-slate-900 dark:text-white">{slot.time}</p>
-              </div>
+
             </div>
             <div className="grid grid-cols-2 gap-4 pt-2 border-t border-blue-200 dark:border-blue-800">
               <div>
@@ -102,7 +92,7 @@ export default function BookingModal({ slot, provider, cost, onClose }: BookingM
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 bg-linear-to-r from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">Booking Summary</h2>
           <button
             onClick={onClose}
@@ -117,32 +107,32 @@ export default function BookingModal({ slot, provider, cost, onClose }: BookingM
           {/* Provider Info */}
           <div className="space-y-2">
             <p className="text-sm text-slate-600 dark:text-slate-400">Provider</p>
-            <p className="text-lg font-bold text-slate-900 dark:text-white">{provider.name}</p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">{provider.specialty}</p>
+            <p className="text-lg font-bold text-slate-900 dark:text-white">{provider?.name}</p>
+            {/* <p className="text-sm text-slate-600 dark:text-slate-400">{provider.specialty}</p> */}
           </div>
 
           {/* Booking Details */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 space-y-3 border border-blue-200 dark:border-blue-800">
             <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm text-slate-600 dark:text-slate-400">Date</p>
-                <p className="font-semibold text-slate-900 dark:text-white">{formatDate(slot.date)}</p>
+                <p className="font-semibold text-slate-900 dark:text-white">{slot.startTime}-{slot.endTime}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm text-slate-600 dark:text-slate-400">Time & Duration</p>
                 <p className="font-semibold text-slate-900 dark:text-white">
-                  {slot.time} - {slot.duration} minutes
+                  {slot.duration} minutes
                 </p>
               </div>
             </div>
 
             <div className="flex items-start gap-3 pt-2 border-t border-blue-200 dark:border-blue-800">
-              <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm text-slate-600 dark:text-slate-400">Total Cost</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white">${cost.toFixed(2)}</p>
