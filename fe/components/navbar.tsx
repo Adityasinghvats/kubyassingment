@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Menu, X, LogIn, LogOut, Calendar, User } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useRouter } from "next/navigation"
 
 
@@ -27,7 +28,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4">
             {user && (
               <>
                 <button
@@ -63,10 +64,14 @@ export default function Navbar() {
                 Login
               </button>
             )}
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
             {user && (
               <button onClick={() => router.push('/bookings')}
                 className="p-2 text-slate-600 dark:text-slate-300">

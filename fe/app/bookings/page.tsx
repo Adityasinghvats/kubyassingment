@@ -22,7 +22,6 @@ export default function BookingsPage() {
         )
     }
     return (
-
         <MyBookingsPage bookings={bookings} />
     );
 }

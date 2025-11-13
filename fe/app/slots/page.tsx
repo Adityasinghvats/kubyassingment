@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
     Plus,
     Calendar,
@@ -13,20 +13,20 @@ import {
     Filter,
     Search
 } from "lucide-react"
-import SlotModal from "@/components/slot-modal"
 import { slotAPI } from "@/services/slotService"
 import { Slot } from "@/interfaces/slot/interface"
 import { useAuth } from "@/hooks/use-auth"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatDate, formatDuration, formatTime } from "@/lib/format"
+import { useRouter } from "next/navigation"
 
 export default function SlotsPage() {
     const queryClient = useQueryClient();
     const { user } = useAuth()
-    const [showSlotModal, setShowSlotModal] = useState(false)
     const [filterStatus, setFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'BOOKED'>('ALL')
     const [searchTerm, setSearchTerm] = useState("")
     const [deleteSlotId, setDeleteSlotId] = useState<string | null>(null)
+    const router = useRouter();
 
     const slotsData = useQuery({
         queryKey: ["slots"],
@@ -49,10 +49,6 @@ export default function SlotsPage() {
         console.log("Deleting slot with ID:", slotId);
         setDeleteSlotId(slotId)
         deleteSlot(slotId)
-    }
-
-    const handleSlotAdded = () => {
-        setShowSlotModal(false)
     }
 
     const filteredSlots = slots.filter(slot => {
@@ -96,7 +92,7 @@ export default function SlotsPage() {
                             </p>
                         </div>
                         <button
-                            onClick={() => setShowSlotModal(true)}
+                            onClick={() => router.push('/slots/new')}
                             className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg hover:shadow-xl"
                         >
                             <Plus className="w-5 h-5" />
@@ -203,7 +199,7 @@ export default function SlotsPage() {
                         </p>
                         {!searchTerm && filterStatus === 'ALL' && (
                             <button
-                                onClick={() => setShowSlotModal(true)}
+                                onClick={() => router.push('/slots/new')}
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                             >
                                 <Plus className="w-5 h-5" />
@@ -315,9 +311,6 @@ export default function SlotsPage() {
                     </div>
                 )}
             </div>
-
-            {/* Slot Modal */}
-            {showSlotModal && <SlotModal onClose={handleSlotAdded} />}
         </div>
     )
 }

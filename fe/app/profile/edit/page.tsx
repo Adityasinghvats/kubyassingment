@@ -63,10 +63,10 @@ export default function EditProfilePage() {
 
     if (currentUserData.isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
                 <div className="text-center space-y-4">
-                    <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="text-slate-600 dark:text-slate-400">Loading your profile...</p>
+                    <div className="w-10 h-10 border-4 border-blue-600/70 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">Loading your profile...</p>
                 </div>
             </div>
         );
@@ -74,10 +74,10 @@ export default function EditProfilePage() {
 
     if (currentUserData.isError || !user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="text-center">
-                    <p className="text-red-600">Failed to load profile</p>
-                    <Link href="/profile" className="mt-4 text-indigo-600 hover:text-indigo-500">
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+                <div className="text-center space-y-3">
+                    <p className="text-red-600 dark:text-red-300">Failed to load profile</p>
+                    <Link href="/profile" className="inline-block text-blue-600 hover:underline">
                         Go back to profile
                     </Link>
                 </div>
@@ -86,26 +86,20 @@ export default function EditProfilePage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Edit Your Profile
-                    </h2>
-                </div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4">
+            <div className="max-w-lg mx-auto">
+                <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 text-center">Edit Profile</h2>
 
-                <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                    {error && (
-                        <div className="rounded-md bg-red-50 p-4">
-                            <div className="text-sm text-red-800">{error}</div>
-                        </div>
-                    )}
+                    <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+                        {error && (
+                            <div className="rounded-lg border border-red-300/50 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 p-3 text-sm">
+                                {error}
+                            </div>
+                        )}
 
-                    <div className="rounded-md shadow-sm space-y-4">
-                        <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                                Name
-                            </label>
+                        <div className="space-y-2">
+                            <label htmlFor="name" className="block text-sm text-slate-700 dark:text-slate-300">Name</label>
                             <input
                                 id="name"
                                 name="name"
@@ -113,24 +107,22 @@ export default function EditProfilePage() {
                                 required
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 placeholder="Full name"
                             />
                         </div>
 
                         {user?.role === "PROVIDER" && (
                             <>
-                                <div>
-                                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Category
-                                    </label>
+                                <div className="space-y-2">
+                                    <label htmlFor="category" className="block text-sm text-slate-700 dark:text-slate-300">Category</label>
                                     <select
                                         id="category"
                                         name="category"
                                         required
                                         value={formData.category}
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value as Category })}
-                                        className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                        className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
                                         {Object.values(Category).map((cat) => (
                                             <option key={cat} value={cat}>
@@ -140,10 +132,8 @@ export default function EditProfilePage() {
                                     </select>
                                 </div>
 
-                                <div>
-                                    <label htmlFor="hourlyRate" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Hourly Rate ($)
-                                    </label>
+                                <div className="space-y-2">
+                                    <label htmlFor="hourlyRate" className="block text-sm text-slate-700 dark:text-slate-300">Hourly Rate ($)</label>
                                     <input
                                         id="hourlyRate"
                                         name="hourlyRate"
@@ -153,46 +143,44 @@ export default function EditProfilePage() {
                                         required
                                         value={formData.hourlyRate}
                                         onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
-                                        className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                        className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="50.00"
                                     />
                                 </div>
 
-                                <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Description
-                                    </label>
+                                <div className="space-y-2">
+                                    <label htmlFor="description" className="block text-sm text-slate-700 dark:text-slate-300">Description</label>
                                     <textarea
                                         id="description"
                                         name="description"
                                         required
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                        className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                        placeholder="Experienced plumber with 5 years in residential repairs"
+                                        className="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                        placeholder="Your professional summary..."
                                         rows={3}
                                     />
                                 </div>
                             </>
                         )}
-                    </div>
 
-                    <div className="flex gap-3">
-                        <Link
-                            href="/profile"
-                            className="flex-1 flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            Cancel
-                        </Link>
-                        <button
-                            type="submit"
-                            disabled={isPending}
-                            className="flex-1 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isPending ? "Updating..." : "Update Profile"}
-                        </button>
-                    </div>
-                </form>
+                        <div className="flex gap-3 pt-2">
+                            <Link
+                                href="/profile"
+                                className="flex-1 inline-flex justify-center rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                Cancel
+                            </Link>
+                            <button
+                                type="submit"
+                                disabled={isPending}
+                                className="flex-1 inline-flex justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                            >
+                                {isPending ? "Updating..." : "Update Profile"}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
