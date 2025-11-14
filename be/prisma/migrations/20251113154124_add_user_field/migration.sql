@@ -1,0 +1,9 @@
+-- CreateEnum
+CREATE TYPE "CATEGORY" AS ENUM ('PLUMBING', 'ELECTRICAL', 'CARPENTRY', 'CLEANING', 'TUTORING', 'CONSULTING', 'HEALTHCARE', 'LEGAL', 'OTHER');
+
+-- AlterTable
+ALTER TABLE "bookings" ADD COLUMN     "description" TEXT;
+
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "category" "CATEGORY" DEFAULT 'OTHER',
+ADD COLUMN     "description" TEXT;
