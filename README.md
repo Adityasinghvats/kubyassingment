@@ -12,6 +12,8 @@ A full-stack consultation booking platform built with Next.js, Express.js, and P
 - **Dark Mode** - Full dark mode support across the application
 - **API Documentation** - Interactive Swagger/OpenAPI documentation
 
+> Get a Neon DB connection string by creating a service and get the connection string and add to `.env` file.
+
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -78,10 +80,10 @@ BETTER_AUTH_URL=http://localhost:3030
 Run Prisma migrations to set up your database schema:
 
 ```bash
-# Deploy Migrations
-npx prisma migrate deploy
 # Generate Prisma Client
 npx prisma generate
+# Deploy Migrations
+npx prisma migrate deploy
 ```
 
 #### Start Backend Server
@@ -268,8 +270,8 @@ erDiagram
 ```
 
 ## ER Image Using Eraser
-<img width="1610" height="2790" alt="image" src="https://github.com/user-attachments/assets/78c37c5f-668f-4f96-b818-d7cda8452ccb" />
 
+<img width="1610" height="2790" alt="image" src="https://github.com/user-attachments/assets/78c37c5f-668f-4f96-b818-d7cda8452ccb" />
 
 ## 🎯 User Roles
 
@@ -333,12 +335,19 @@ BETTER_AUTH_SECRET=    # Secret for auth encryption
 BETTER_AUTH_URL=       # Auth service URL
 ```
 
-### Frontend (.env.local)
+### Frontend (.env)
 
 ```env
 NEXT_PUBLIC_BACKEND_URL=  # Backend API URL
-NEXT_PUBLIC_API_URL=      # API version URL
 ```
+
+## 👤 Using the app
+
+- Start creating `Providers` and `Consumers` using `/register`
+- Login using `Provider` credentials and start creating slots by using `Add slot` in profile using `/slots/add`
+- Login using `Client` credentials and explore `/providers` and then start booking slots and get detailed information about time slots and price
+- Manage bookings using `/boookings` and cancel your bookings at your convenience
+- `Providers` can manage their slots at `/slots`.
 
 ## 🧪 Testing
 
