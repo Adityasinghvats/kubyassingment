@@ -12,8 +12,6 @@ A full-stack consultation booking platform built with Next.js, Express.js, and P
 - **Dark Mode** - Full dark mode support across the application
 - **API Documentation** - Interactive Swagger/OpenAPI documentation
 
-> Get a Neon DB connection string by creating a service and get the connection string and add to `.env` file.
-
 ## 📋 Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -22,6 +20,7 @@ Before you begin, ensure you have the following installed:
 - [npm](https://www.npmjs.com/) (comes with Node.js)
 - [pnpm](https://pnpm.io/) (for frontend)
 - [PostgreSQL](https://www.postgresql.org/) database / [NeonDB](https://neon.com/) connection string
+  > Get a Neon DB connection string by creating a service and get the connection string and add to `.env` file.
 
 ## 🛠️ Setup Instructions
 
@@ -295,8 +294,7 @@ erDiagram
 
 ### Authentication
 
-- `POST /api/auth/sign-up` - Register new user
-- `POST /api/auth/sign-in` - Login user
+- `POST /api/auth/sign-in/email` - Login user
 - `POST /api/auth/sign-out` - Logout user
 - `GET /api/auth/get-session` - Get current session
 
@@ -310,16 +308,16 @@ erDiagram
 ### Slots
 
 - `POST /api/v1/slots` - Create new slot (Provider only)
-- `GET /api/v1/slots` - Get all available slots
+- `GET /api/v1/slots/:providerId` - Get all available slots
 - `GET /api/v1/slots/my-slots` - Get provider's slots (Provider only)
 - `DELETE /api/v1/slots/:id` - Delete slot (Provider only)
 
 ### Bookings
 
 - `POST /api/v1/bookings` - Create booking (Client only)
-- `GET /api/v1/bookings` - Get all bookings
-- `GET /api/v1/bookings/my-bookings` - Get user's bookings
-- `PATCH /api/v1/bookings/:id` - Update booking status
+- `GET /api/v1/bookings/me` - Get all bookings
+- `POST /api/v1/bookings/:id/complete` - Complete Booking
+- `POST /api/v1/bookings/:id/cancel` - Cancel Booking
 
 ## 🔐 Environment Variables
 
