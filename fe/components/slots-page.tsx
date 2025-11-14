@@ -9,7 +9,6 @@ import { Slot } from "@/interfaces/slot/interface"
 import { useRouter } from "next/navigation"
 import { formatDate, formatDuration, formatTime } from "@/lib/format"
 import { User } from "@/interfaces/user/interface"
-import { useRequireAuth } from "@/hooks/use-auth"
 
 interface SlotsPageProps {
   providerId: string
@@ -18,10 +17,6 @@ interface SlotsPageProps {
 export default function SlotsPage({ providerId }: SlotsPageProps) {
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
   const router = useRouter();
-  const { session } = useRequireAuth();
-  if (!session) {
-    return null;
-  }
   const slotsData = useQuery({
     queryKey: ['slots', providerId],
     queryFn: () => slotAPI.getSlots(providerId),
@@ -38,6 +33,19 @@ export default function SlotsPage({ providerId }: SlotsPageProps) {
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-slate-600 dark:text-slate-400">Loading slots...</p>
         </div>
+      </div>
+    )
+  }
+  if (slots.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900 px-4">
+        <button
+          onClick={() => router.push('/providers')}
+          className="flex items-center gap-2 rounded-lg px-4 py-2 bg-blue-600 text-white dark:bg-blue-400 hover:bg-blue-700 dark:hover:bg-blue-300 mb-6 font-medium transition-colors"
+        >
+          Find Other Providers
+        </button>
+        <p className="text-slate-600 dark:text-slate-400">No slots available for this provider.</p>
       </div>
     )
   }

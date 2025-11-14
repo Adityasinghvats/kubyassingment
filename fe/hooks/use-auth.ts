@@ -76,20 +76,3 @@ export function useAuth() {
         signOut,
     };
 }
-
-export function useRequireAuth(requiredRole?: 'PROVIDER' | 'CLIENT') {
-    const { session, isLoading } = useAuth();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isLoading && !session) {
-            router.push('/login');
-        }
-
-        if (!isLoading && session && requiredRole && session.user.role !== requiredRole) {
-            router.push('/');
-        }
-    }, [session, isLoading, requiredRole, router]);
-
-    return { session, isLoading };
-}

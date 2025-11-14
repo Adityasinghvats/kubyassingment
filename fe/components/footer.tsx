@@ -7,7 +7,7 @@ export default function Footer() {
                 <div className="h-16 flex flex-col sm:flex-row items-center justify-between gap-3">
                     {/* Brand */}
                     <div className="flex items-center gap-2">
-                        <span className="inline-flex h-8 w-8 items-center justify-center rounded bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold">
+                        <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold">
                             O
                         </span>
                         <span className="text-2xl font-semibold text-slate-900 dark:text-white">

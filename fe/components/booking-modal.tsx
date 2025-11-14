@@ -24,7 +24,7 @@ export default function BookingModal({ slot, provider, cost, onClose }: BookingM
   const { mutate: createBooking, isPending: isBooking } = useMutation({
     mutationFn: bookingAPI.addBooking,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["bookings", "slots"] });
       setIsBooked(true);
     },
     onError: (error: Error) => {

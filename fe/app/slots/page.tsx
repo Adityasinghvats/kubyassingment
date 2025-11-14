@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { slotAPI } from "@/services/slotService"
 import { Slot } from "@/interfaces/slot/interface"
-import { useAuth, useRequireAuth } from "@/hooks/use-auth"
+import { useAuth } from "@/hooks/use-auth"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatDate, formatDuration, formatTime } from "@/lib/format"
 import { useRouter } from "next/navigation"
@@ -27,10 +27,6 @@ export default function SlotsPage() {
     const [searchTerm, setSearchTerm] = useState("")
     const [deleteSlotId, setDeleteSlotId] = useState<string | null>(null)
     const router = useRouter();
-    const { session } = useRequireAuth('PROVIDER');
-    if (!session) {
-        return null;
-    }
 
     const slotsData = useQuery({
         queryKey: ["slots"],

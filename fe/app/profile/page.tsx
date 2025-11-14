@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth, useRequireAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import {
     User as UserIcon,
     Mail,
@@ -14,24 +14,15 @@ import { userService } from "@/services/userService";
 import { User } from "@/interfaces/user/interface";
 
 export default function ProfilePage() {
-    const { signOut } = useAuth();
+    const { signOut, isLoading, user } = useAuth();
     const router = useRouter();
-    const { session, isLoading } = useRequireAuth();
-    if (!session) {
-        return null;
-    }
-    const currentUserData = useQuery({
-        queryKey: ["currentUser"],
-        queryFn: () => userService.getCurrentUser()
-    });
 
-    const user: User = currentUserData.data?.data?.user;
     const handleLogout = async () => {
         await signOut()
         router.push("/")
     }
 
-    if (isLoading || currentUserData.isLoading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-slate-900">
                 <div className="text-center space-y-4">

@@ -9,7 +9,6 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { slotAPI } from "@/services/slotService";
 import { useRouter } from "next/navigation";
-import { useRequireAuth } from "@/hooks/use-auth";
 
 
 export default function SlotModal() {
@@ -18,10 +17,6 @@ export default function SlotModal() {
     const [endTime, setEndTime] = useState<Dayjs | null>(dayjs().add(1, 'hour'));
     const queryClient = useQueryClient();
     const router = useRouter();
-    const { session } = useRequireAuth('PROVIDER');
-    if (!session) {
-        return null;
-    }
 
     const { mutate: createSlot, isPending: isAdding } = useMutation({
         mutationFn: slotAPI.addSlot,

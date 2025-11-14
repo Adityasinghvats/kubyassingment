@@ -31,7 +31,7 @@ export default function MyBookingsPage({ bookings }: MyBookingsPageProps) {
   const { mutate: completeBooking, isPending: isCompleting } = useMutation({
     mutationFn: bookingAPI.completeBooking,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+      queryClient.invalidateQueries({ queryKey: ["bookings", "slots"] });
     },
     onError: (error: Error) => {
       console.error("Error completing booking:", error);
