@@ -10,47 +10,6 @@ import { swaggerSpec } from './utils/swagger';
 
 const app = express();
 
-app.use(
-    cors({
-        origin: process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
-        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        credentials: true,
-        allowedHeaders: ['Content-Type', 'Authorization']
-    })
-);
-
-app.all('/api/auth/*splat', toNodeHandler(auth));
-app.use(express.json());
-
-
-import userRoutes from './routes/user.router';
-import slotRoutes from './routes/slot.router';
-import bookingRoutes from './routes/booking.router';
-
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/slots', slotRoutes);
-app.use('/api/v1/bookings', bookingRoutes);
-
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
-});
-
-app.get('/api-docs.json', (req, res) => {
-    const baseUrl = process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;
-    const spec = { ...swaggerSpec, servers: [{ url: baseUrl }] };
-    res.setHeader('Content-Type', 'application/json');
-    res.send(spec);
-});
-
-// add flag or auth for api-docs endpoint in production
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, {
-    swaggerOptions: { url: '/api-docs.json' }
-}));
-
 const morganFormat = ":method :url :status :response-time ms";
 
 app.use(
@@ -68,6 +27,48 @@ app.use(
         },
     })
 );
+
+
+app.use(
+    cors({
+        origin: process.env.FRONTEND_ORIGIN || 'http://localhost:3000',
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization']
+    })
+);
+
+app.all('/api/auth/*splat', toNodeHandler(auth));
+app.use(express.json());
+
+import userRoutes from './routes/user.router';
+import slotRoutes from './routes/slot.router';
+import bookingRoutes from './routes/booking.router';
+
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/slots', slotRoutes);
+app.use('/api/v1/bookings', bookingRoutes);
+
+app.get('/api-docs.json', (req, res) => {
+    const baseUrl = process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const spec = { ...swaggerSpec, servers: [{ url: baseUrl }] };
+    res.setHeader('Content-Type', 'application/json');
+    res.send(spec);
+});
+
+// add flag or auth for api-docs endpoint in production
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(undefined, {
+    swaggerOptions: { url: '/api-docs.json' }
+}));
+
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' });
+});
 
 app.use(errorHandler)
 
