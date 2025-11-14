@@ -267,6 +267,10 @@ erDiagram
     }
 ```
 
+## ER Image Using Eraser
+<img width="1610" height="2790" alt="image" src="https://github.com/user-attachments/assets/78c37c5f-668f-4f96-b818-d7cda8452ccb" />
+
+
 ## 🎯 User Roles
 
 ### Client
