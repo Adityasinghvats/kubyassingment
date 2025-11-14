@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, useRequireAuth } from "@/hooks/use-auth";
 import {
     User as UserIcon,
     Mail,
@@ -15,14 +14,22 @@ import { userService } from "@/services/userService";
 import { User } from "@/interfaces/user/interface";
 
 export default function ProfilePage() {
-    const { isLoading, signOut } = useAuth();
+    const { signOut } = useAuth();
     const router = useRouter();
+    const { session, isLoading } = useRequireAuth();
+    if (!session) {
+        return null;
+    }
     const currentUserData = useQuery({
         queryKey: ["currentUser"],
         queryFn: () => userService.getCurrentUser()
     });
 
     const user: User = currentUserData.data?.data?.user;
+    const handleLogout = async () => {
+        await signOut()
+        router.push("/")
+    }
 
     if (isLoading || currentUserData.isLoading) {
         return (
@@ -46,8 +53,6 @@ export default function ProfilePage() {
             </div>
         );
     }
-
-
 
     return (
         <div className="min-h-screen bg-linear-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-12 px-4 sm:px-6 lg:px-8">
@@ -86,9 +91,9 @@ export default function ProfilePage() {
                             </>
 
                         </div>
-                        <div className="flex flex-row gap-4 mt-6">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-6">
                             <button
-                                onClick={() => signOut()}
+                                onClick={handleLogout}
                                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                             >
                                 <LogOut className="w-4 h-4" />

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Category, SignUpData, User } from "@/interfaces/user/interface";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
+import { useRequireAuth } from "@/hooks/use-auth";
 
 export default function EditProfilePage() {
     const router = useRouter();
@@ -17,6 +18,10 @@ export default function EditProfilePage() {
         hourlyRate: "0.00",
     });
     const queryClient = useQueryClient();
+    const { session } = useRequireAuth();
+    if (!session) {
+        return null;
+    }
 
     const currentUserData = useQuery({
         queryKey: ["currentUser"],
@@ -60,6 +65,8 @@ export default function EditProfilePage() {
         console.log("Updating profile with data:", payload);
         updateProfile(payload);
     };
+
+
 
     if (currentUserData.isLoading) {
         return (

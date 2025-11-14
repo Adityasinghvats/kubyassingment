@@ -1,9 +1,5 @@
-import React from 'react'
+import { notFound } from "next/navigation";
 
-function page() {
-    return (
-        <div>page</div>
-    )
+export default function CatchAllNotFoundPage() {
+    notFound();
 }
-
-export default page

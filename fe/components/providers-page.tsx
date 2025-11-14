@@ -12,8 +12,8 @@ interface ProvidersPageProps {
 export default function ProvidersPage({ providers }: ProvidersPageProps) {
   const router = useRouter();
   return (
-    <div className="min-h-screen bg-linear-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-      <div className="max-w-7xl mx-auto py-12 px-12 sm:px-16 lg:px-24">
+    <div className="bg-linear-to-r from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">Expert Consultants</h1>
           <p className="text-slate-600 dark:text-slate-300">

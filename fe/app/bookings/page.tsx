@@ -1,10 +1,15 @@
 "use client";
 
 import MyBookingsPage from "@/components/my-bookings-page";
+import { useRequireAuth } from "@/hooks/use-auth";
 import { bookingAPI } from "@/services/bookingService";
 import { useQuery } from "@tanstack/react-query";
 
 export default function BookingsPage() {
+    const { session } = useRequireAuth();
+    if (!session) {
+        return null;
+    }
     const bookingsData = useQuery({
         queryKey: ['bookings'],
         queryFn: () => bookingAPI.getBookings(),
@@ -21,6 +26,7 @@ export default function BookingsPage() {
             </div>
         )
     }
+
     return (
         <MyBookingsPage bookings={bookings} />
     );

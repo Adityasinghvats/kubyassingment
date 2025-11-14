@@ -33,15 +33,16 @@ export default function Navbar() {
               <>
                 <button
                   onClick={() => router.push('/providers')}
-                  className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
+                  <User className="w-4 h-4" />
                   Browse Providers
                 </button>
                 <button
                   onClick={() => router.push('/bookings')}
-                  className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-4 h-4 inline-block mr-1" />
                   My Bookings
                 </button>
               </>
@@ -72,6 +73,10 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
             <ThemeToggle />
+            <button onClick={() => router.push('/providers')}
+              className="p-2 text-slate-600 dark:text-slate-300">
+              <User className="w-5 h-5" />
+            </button>
             {user && (
               <button onClick={() => router.push('/bookings')}
                 className="p-2 text-slate-600 dark:text-slate-300">

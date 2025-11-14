@@ -9,7 +9,7 @@ export default function Home() {
     <div className="bg-white dark:bg-slate-950">
       {/* Hero */}
       <section className="min-h-[calc(100vh-4rem)] bg-linear-to-br from-blue-50 to-indigo-50 dark:from-slate-900 dark:to-slate-800 flex items-center">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full py-18">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div className="space-y-6 text-center lg:text-left">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300">
@@ -19,7 +19,7 @@ export default function Home() {
                 Find the right expert. Book with confidence.
               </h1>
               <p className="text-lg text-slate-600 dark:text-slate-300">
-                ConsultHub connects you with vetted providers across categories like Healthcare,
+                WorkBagel connects you with vetted providers across categories like Healthcare,
                 Legal, Tutoring, and more. Transparent pricing, real availability.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 sm:justify-center lg:justify-start">
@@ -94,7 +94,7 @@ export default function Home() {
                       <p className="text-base font-semibold text-slate-900 dark:text-white">Today, 3:00 PM</p>
                     </div>
                     <button
-                      onClick={() => router.push("/slots")}
+                      onClick={() => router.push("/providers")}
                       className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
                     >
                       See Slots
@@ -104,7 +104,7 @@ export default function Home() {
               </div>
 
               {/* Decorative glow */}
-              <div className="absolute -inset-6 -z-10 bg-gradient-to-tr from-blue-200/40 to-indigo-200/30 dark:from-blue-500/10 dark:to-indigo-500/10 blur-2xl rounded-3xl"></div>
+              <div className="absolute -inset-6 -z-10 bg-linear-to-tr from-blue-200/40 to-indigo-200/30 dark:from-blue-500/10 dark:to-indigo-500/10 blur-2xl rounded-3xl"></div>
             </div>
           </div>
         </div>
@@ -114,7 +114,7 @@ export default function Home() {
       <section className="py-16 bg-white dark:bg-slate-950">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">Why ConsultHub</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">Why WorkBagel</h2>
             <p className="text-slate-600 dark:text-slate-400 mt-2">Simple, transparent, and reliable.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -155,7 +155,7 @@ export default function Home() {
             ].map((c) => (
               <span
                 key={c}
-                className="px-3 py-1 rounded-full text-xs border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900"
+                className="px-4 py-2 rounded-full text-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-900 bg-blue-200 dark:bg-slate-200"
               >
                 {c}
               </span>

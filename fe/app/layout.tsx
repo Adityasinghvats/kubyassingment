@@ -13,7 +13,7 @@ const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100", "200
 const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200", "300", "400", "500", "600", "700", "800", "900"] })
 
 export const metadata: Metadata = {
-  title: "ConsultHub - Book Expert Consultations",
+  title: "WorkBagel - Book Expert Consultations",
   description: "Find and book consultations with expert providers",
   icons: {
     icon: [

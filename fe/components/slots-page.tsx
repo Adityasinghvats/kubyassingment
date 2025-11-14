@@ -9,6 +9,7 @@ import { Slot } from "@/interfaces/slot/interface"
 import { useRouter } from "next/navigation"
 import { formatDate, formatDuration, formatTime } from "@/lib/format"
 import { User } from "@/interfaces/user/interface"
+import { useRequireAuth } from "@/hooks/use-auth"
 
 interface SlotsPageProps {
   providerId: string
@@ -17,6 +18,10 @@ interface SlotsPageProps {
 export default function SlotsPage({ providerId }: SlotsPageProps) {
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null)
   const router = useRouter();
+  const { session } = useRequireAuth();
+  if (!session) {
+    return null;
+  }
   const slotsData = useQuery({
     queryKey: ['slots', providerId],
     queryFn: () => slotAPI.getSlots(providerId),

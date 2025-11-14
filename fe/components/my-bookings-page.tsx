@@ -66,12 +66,18 @@ export default function MyBookingsPage({ bookings }: MyBookingsPageProps) {
     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-4">
         <div>
+          <h3 className="text-xs text-slate-600 dark:text-slate-400 mb-1">Booking Provider</h3>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">{booking.provider.name}</h3>
-          {/* <p className="text-sm text-slate-600 dark:text-slate-400">{booking.provider.specialty}</p> */}
+          <p className="text-sm text-slate-600 dark:text-slate-400">{booking.provider?.description}</p>
         </div>
+
         <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusStyles(booking.status)}`}>
           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
         </span>
+      </div>
+      <div className="mb-4">
+        <h3 className="text-xs text-slate-600 dark:text-slate-400 mb-1">Booking Client</h3>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{booking.client.name}</h3>
       </div>
 
       <div className="space-y-3 mb-4 pb-4 border-b border-slate-200 dark:border-slate-800">

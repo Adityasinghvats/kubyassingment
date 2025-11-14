@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { slotAPI } from "@/services/slotService"
 import { Slot } from "@/interfaces/slot/interface"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuth, useRequireAuth } from "@/hooks/use-auth"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatDate, formatDuration, formatTime } from "@/lib/format"
 import { useRouter } from "next/navigation"
@@ -27,6 +27,10 @@ export default function SlotsPage() {
     const [searchTerm, setSearchTerm] = useState("")
     const [deleteSlotId, setDeleteSlotId] = useState<string | null>(null)
     const router = useRouter();
+    const { session } = useRequireAuth('PROVIDER');
+    if (!session) {
+        return null;
+    }
 
     const slotsData = useQuery({
         queryKey: ["slots"],
@@ -78,7 +82,7 @@ export default function SlotsPage() {
 
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="max-w-5xl mx-auto space-y-6">
                 {/* Header */}
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
