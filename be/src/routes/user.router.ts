@@ -6,6 +6,7 @@ import {
 } from "../controllers/user.controller";
 import Router from "express";
 import { requireAuth } from "../middleware/authMiddleware";
+import { upload } from "../middleware/multerMiddleware";
 
 const router = Router();
 
@@ -20,7 +21,7 @@ const router = Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             $ref: '#/components/schemas/UserRegisterRequest'
  *     responses:
@@ -37,7 +38,8 @@ const router = Router();
  *             schema:
  *               $ref: '#/components/schemas/ApiErrorResponse'
  */
-router.post('/register', registerUser);
+router.route('/register')
+    .post(upload.single('profileImage'), registerUser);
 
 /**
  * @openapi
@@ -84,7 +86,7 @@ router.get('/me', requireAuth, getCurrentUser);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         muultipart/form-data:
  *           schema:
  *             $ref: '#/components/schemas/UserUpdateRequest'
  *     responses:
@@ -107,7 +109,8 @@ router.get('/me', requireAuth, getCurrentUser);
  *             schema:
  *               $ref: '#/components/schemas/ApiErrorResponse'
  */
-router.patch('/me', requireAuth, updateCurrentUser);
+router.route('/me')
+    .patch(requireAuth, upload.single('profileImage'), updateCurrentUser);
 
 /**
  * @openapi

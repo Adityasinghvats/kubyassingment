@@ -102,7 +102,8 @@ const getMyBookings = asyncHandler(async (req: Request, res: Response) => {
                 select: {
                     id: true,
                     name: true,
-                    email: true
+                    email: true,
+                    phoneNumber: true
                 }
             },
             provider: {
@@ -110,7 +111,8 @@ const getMyBookings = asyncHandler(async (req: Request, res: Response) => {
                     id: true,
                     name: true,
                     email: true,
-                    hourlyRate: true
+                    hourlyRate: true,
+                    phoneNumber: true
                 }
             }
         },
@@ -165,14 +167,16 @@ const cancelBooking = asyncHandler(async (req: Request, res: Response) => {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        phoneNumber: true
                     }
                 },
                 provider: {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        phoneNumber: true
                     }
                 }
             }
@@ -221,7 +225,8 @@ const completeBooking = asyncHandler(async (req: Request, res: Response) => {
                 select: {
                     id: true,
                     name: true,
-                    email: true
+                    email: true,
+                    phoneNumber: true
                 }
             }
         }

@@ -1,6 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler";
 import { prisma } from "../utils/db";
-import { logger } from "../utils/logger";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { Request, Response } from "express";
@@ -12,11 +11,13 @@ interface CreateSlotBody {
 }
 
 interface GetSlotsQuery {
-    providerId?: string;
     status?: string;
 }
 
 
+interface GetSlotsParams {
+    providerId?: string;
+}
 const createSlot = asyncHandler(async (req: Request<{}, {}, CreateSlotBody>, res: Response) => {
     const { startTime, endTime, duration } = req.body;
 
@@ -47,7 +48,7 @@ const createSlot = asyncHandler(async (req: Request<{}, {}, CreateSlotBody>, res
     res.status(201).json(new ApiResponse(201, { slot }, 'Slot created successfully'));
 });
 
-const getSlots = asyncHandler(async (req: Request<{}, {}, {}, GetSlotsQuery>, res: Response) => {
+const getSlots = asyncHandler(async (req: Request<GetSlotsParams, {}, {}, GetSlotsQuery>, res: Response) => {
     const { status = 'AVAILABLE' } = req.query;
     const { providerId } = req.params;
 
@@ -70,7 +71,17 @@ const getSlots = asyncHandler(async (req: Request<{}, {}, {}, GetSlotsQuery>, re
                     id: true,
                     name: true,
                     hourlyRate: true,
-                    image: true
+                    image: true,
+                    rating: true,
+                    description: true,
+                    address: true,
+                    phoneNumber: true,
+                    _count: {
+                        select: {
+                            slots: true,
+                            bookingsReceived: true,
+                        }
+                    }
                 }
             }
         },

@@ -11,6 +11,10 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    advanced: {
+        // remember to remove it for production deployments
+        disableCSRFCheck: process.env.NODE_ENV !== 'production'
+    },
     trustedOrigins: [process.env.FRONTEND_ORIGIN || "http://localhost:3000"],
     user: {
         additionalFields: {
