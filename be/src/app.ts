@@ -10,6 +10,8 @@ import { swaggerSpec } from './utils/swagger';
 
 const app = express();
 
+// startCronJobs();
+
 const morganFormat = ":method :url :status :response-time ms";
 
 app.use(
@@ -44,6 +46,7 @@ app.use(express.json());
 import userRoutes from './routes/user.router';
 import slotRoutes from './routes/slot.router';
 import bookingRoutes from './routes/booking.router';
+import { startCronJobs } from './utils/cron-jobs';
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/slots', slotRoutes);
