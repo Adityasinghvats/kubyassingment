@@ -11,51 +11,50 @@ import { deleteResource, uploadResource } from "../utils/cloudinary";
 
 
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password, name, role, hourlyRate, description, category, address, phoneNumber } = req.body;
-    // const uploadFiles = req.files as { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[] | undefined;
-    // const imageLocalPath = Array.isArray(uploadFiles) ? uploadFiles[0]?.path : uploadFiles?.profileImage?.[0]?.path;
-    const imageLocalPath = req.file?.path;
-    if (!imageLocalPath) {
-        logger.error('User sign-up: Profile image is not provided');
-    }
     let profileImageFile: any = null;
-    if (imageLocalPath) {
-        profileImageFile = await uploadResource(imageLocalPath);
-    }
-
-    if (!email || !password || !name || !address || !phoneNumber) {
-        logger.error('User sign-up failed: Missing required fields');
-        throw new ApiError(400, 'Email, password, name, address, and phone number are required');
-    }
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-        logger.error(`User sign-up failed: User with email ${email} already exists`);
-        throw new ApiError(400, 'User already exists');
-    }
-
-    if (role && !['CLIENT', 'PROVIDER'].includes(role)) {
-        logger.error(`User sign-up failed: Invalid role ${role}`);
-        throw new ApiError(400, 'Invalid role specified');
-    }
-
-    let parsedHourlyRate: Decimal | undefined = undefined;
-    if (hourlyRate) {
-        if (isNaN(parseFloat(hourlyRate))) {
-            logger.error(`User sign-up failed: Invalid hourly rate ${hourlyRate}`);
-            throw new ApiError(400, 'Invalid hourly rate specified');
-        }
-        parsedHourlyRate = new Decimal(hourlyRate);
-    }
-
-    // first create user in better-auth
-    const result = await auth.api.signUpEmail({
-        body: { email, password, name, role }
-    })
-
-    // add additional fields in our own database
     try {
+        const { email, password, name, role, hourlyRate, description, category, address, phoneNumber } = req.body;
+        const imageLocalPath = req.file?.path;
+        if (!imageLocalPath) {
+            logger.error('User sign-up: Profile image is not provided');
+        }
+
+        if (imageLocalPath) {
+            profileImageFile = await uploadResource(imageLocalPath);
+        }
+
+        if (!email || !password || !name || !address || !phoneNumber) {
+            logger.error('User sign-up failed: Missing required fields');
+            throw new ApiError(400, 'Email, password, name, address, and phone number are required');
+        }
+
+        // Check if user already exists
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            logger.error(`User sign-up failed: User with email ${email} already exists`);
+            throw new ApiError(400, 'User already exists');
+        }
+
+        if (role && !['CLIENT', 'PROVIDER'].includes(role)) {
+            logger.error(`User sign-up failed: Invalid role ${role}`);
+            throw new ApiError(400, 'Invalid role specified');
+        }
+
+        let parsedHourlyRate: Decimal | undefined = undefined;
+        if (hourlyRate) {
+            if (isNaN(parseFloat(hourlyRate))) {
+                logger.error(`User sign-up failed: Invalid hourly rate ${hourlyRate}`);
+                throw new ApiError(400, 'Invalid hourly rate specified');
+            }
+            parsedHourlyRate = new Decimal(hourlyRate);
+        }
+
+        // first create user in better-auth
+        const result = await auth.api.signUpEmail({
+            body: { email, password, name, role }
+        })
+
+        // add additional fields in our own database
         if (result.user) {
             await prisma.user.update({
                 where: { id: result.user.id },
@@ -69,15 +68,14 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
                 }
             });
         }
+        return res.status(201).json(new ApiResponse(201, { result }, 'User registered successfully'));
     } catch (error) {
         logger.error(`User sign-up failed during profile creation: ${error}`);
         if (profileImageFile) {
             await deleteResource(profileImageFile.public_id);
         }
-        return res.status(201).json(new ApiResponse(201, { result }, 'User registered successfully without profile details'));
+        throw new ApiError(500, 'User registration failed');
     }
-
-    return res.status(201).json(new ApiResponse(201, { result }, 'User registered successfully'));
 })
 
 const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
@@ -116,46 +114,43 @@ const getCurrentUser = asyncHandler(async (req: Request, res: Response) => {
 })
 
 const updateCurrentUser = asyncHandler(async (req: Request, res: Response) => {
-    const { name, hourlyRate, description, category, address, phoneNumber } = req.body;
-
-    // const uploadFiles = req.files as { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[] | undefined;
-    // const imageLocalPath = Array.isArray(uploadFiles) ? uploadFiles[0]?.path : uploadFiles?.profileImage?.[0]?.path;
-    const imageLocalPath = req.file?.path;
-    let oldImagePublicId: string | null = null;
-    if (!imageLocalPath) {
-        logger.error('User sign-up: Profile image is not provided');
-    }
     let profileImageFile: any = null;
-
-    if (hourlyRate && isNaN(parseFloat(hourlyRate))) {
-        logger.error(`User profile update failed: Invalid hourly rate ${hourlyRate}`);
-        throw new ApiError(400, 'Invalid hourly rate specified');
-    }
-
-    if (imageLocalPath) {
-        try {
-            // Get old image URL to delete later
-            const currentUser = await prisma.user.findUnique({
-                where: { id: req.user.id },
-                select: { image: true }
-            });
-
-            if (currentUser?.image) {
-                // Extract public_id from Cloudinary URL
-                const urlParts = currentUser.image.split('/');
-                const fileName = urlParts[urlParts.length - 1];
-                oldImagePublicId = fileName.split('.')[0];
-            }
-
-            profileImageFile = await uploadResource(imageLocalPath);
-        } catch (error) {
-            logger.error(`Failed to upload profile image: ${error}`);
-            throw new ApiError(500, 'Failed to upload profile image');
-        }
-    }
-
-    let updatedUser: any;
     try {
+        const { name, hourlyRate, description, category, address, phoneNumber, role } = req.body;
+        const imageLocalPath = req.file?.path;
+        let oldImagePublicId: string | null = null;
+        if (!imageLocalPath) {
+            logger.error('User sign-up: Profile image is not provided');
+        }
+
+        if (hourlyRate && isNaN(parseFloat(hourlyRate))) {
+            logger.error(`User profile update failed: Invalid hourly rate ${hourlyRate}`);
+            throw new ApiError(400, 'Invalid hourly rate specified');
+        }
+
+        if (imageLocalPath) {
+            try {
+                // Get old image URL to delete later
+                const currentUser = await prisma.user.findUnique({
+                    where: { id: req.user.id },
+                    select: { image: true }
+                });
+
+                if (currentUser?.image) {
+                    // Extract public_id from Cloudinary URL
+                    const urlParts = currentUser.image.split('/');
+                    const fileName = urlParts[urlParts.length - 1];
+                    oldImagePublicId = fileName.split('.')[0];
+                }
+
+                profileImageFile = await uploadResource(imageLocalPath);
+            } catch (error) {
+                logger.error(`Failed to upload profile image: ${error}`);
+                throw new ApiError(500, 'Failed to upload profile image');
+            }
+        }
+
+        let updatedUser: any;
         updatedUser = await prisma.user.update({
             where: { id: req.user.id },
             data: {
@@ -165,7 +160,8 @@ const updateCurrentUser = asyncHandler(async (req: Request, res: Response) => {
                 ...(category && { category }),
                 ...(address && { address }),
                 ...(phoneNumber && { phoneNumber }),
-                ...(profileImageFile && { image: profileImageFile.url })
+                ...(role && { role }),
+                ...(profileImageFile && { image: profileImageFile.url }),
             },
             select: {
                 id: true,
@@ -186,6 +182,7 @@ const updateCurrentUser = asyncHandler(async (req: Request, res: Response) => {
                 logger.warn(`Failed to delete old image: ${err}`)
             );
         }
+        return res.json(new ApiResponse(200, { user: updatedUser }, 'User profile updated successfully'));
     } catch (error) {
         logger.error(`User profile update failed: ${error}`);
         if (profileImageFile) {
@@ -193,7 +190,7 @@ const updateCurrentUser = asyncHandler(async (req: Request, res: Response) => {
         }
         throw new ApiError(500, 'Failed to update user profile');
     }
-    return res.json(new ApiResponse(200, { user: updatedUser }, 'User profile updated successfully'));
+
 });
 
 const getProviders = asyncHandler(async (req: Request, res: Response) => {

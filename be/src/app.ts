@@ -42,6 +42,7 @@ app.use(
 
 app.all('/api/auth/*splat', toNodeHandler(auth));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 import userRoutes from './routes/user.router';
 import slotRoutes from './routes/slot.router';

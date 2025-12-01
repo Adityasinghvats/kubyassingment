@@ -1,5 +1,12 @@
 import multer from "multer";
 import { ApiError } from "../utils/apiError";
+import fs from 'fs'
+import path from 'path';
+
+const tempDir = path.join(__dirname, '../../public/temp');
+if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
