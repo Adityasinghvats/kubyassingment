@@ -4,7 +4,7 @@ import { logger } from "../utils/logger";
 import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { Request, Response } from "express";
-import { Decimal } from "@prisma/client/runtime/library";
+import { Decimal } from "@prisma/client/runtime/client";
 
 
 const createBooking = asyncHandler(async (req: Request, res: Response) => {
@@ -97,22 +97,25 @@ const getMyBookings = asyncHandler(async (req: Request, res: Response) => {
             ? { clientId: req.user.id }
             : { providerId: req.user.id },
         include: {
-            slot: true,
+            slot: {
+                select: {
+                    startTime: true,
+                    endTime: true,
+                    status: true,
+                    duration: true
+                }
+            },
             client: {
                 select: {
                     id: true,
                     name: true,
-                    email: true,
-                    phoneNumber: true
                 }
             },
             provider: {
                 select: {
                     id: true,
                     name: true,
-                    email: true,
-                    hourlyRate: true,
-                    phoneNumber: true
+                    category: true
                 }
             }
         },
@@ -186,6 +189,38 @@ const cancelBooking = asyncHandler(async (req: Request, res: Response) => {
     res.json(new ApiResponse(200, { booking: updatedBooking }, 'Booking cancelled successfully'));
 });
 
+const getBookingById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    if (!id) {
+        throw new ApiError(400, 'Booking ID is required');
+    }
+    const booking = await prisma.booking.findUnique({
+        where: { id },
+        include: {
+            slot: true,
+            client: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phoneNumber: true
+                }
+            },
+            provider: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    hourlyRate: true,
+                    phoneNumber: true,
+                    category: true
+                }
+            }
+        },
+    })
+    res.json(new ApiResponse(200, { booking }, 'Booking fetched successfully'));
+});
+
 const completeBooking = asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -240,5 +275,6 @@ export {
     createBooking,
     getMyBookings,
     cancelBooking,
-    completeBooking
+    completeBooking,
+    getBookingById
 }

@@ -76,9 +76,10 @@ const getSlots = asyncHandler(async (req: Request<GetSlotsParams, {}, {}, GetSlo
                     description: true,
                     address: true,
                     phoneNumber: true,
+                    category: true,
                     _count: {
                         select: {
-                            slots: true,
+                            slots: { where: { status: 'AVAILABLE' } },
                             bookingsReceived: true,
                         }
                     }
@@ -101,6 +102,11 @@ const getMySlots = asyncHandler(async (req: Request, res: Response) => {
             providerId: req.user.id
         },
         include: {
+            user: {
+                select: {
+                    id: true,
+                }
+            },
             bookings: {
                 include: {
                     client: {

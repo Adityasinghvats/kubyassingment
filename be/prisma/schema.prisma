@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -71,7 +70,7 @@ model User {
 
 model Slot {
   id         String     @id @default(uuid())
-  user       User       @relation("UserSlots", fields: [providerId], references: [id])
+  user       User       @relation("UserSlots", fields: [providerId], references: [id], onDelete: Cascade)
   providerId String
   startTime  DateTime
   endTime    DateTime
@@ -86,11 +85,11 @@ model Slot {
 
 model Booking {
   id            String        @id @default(uuid())
-  slot          Slot          @relation("BookedSlot", fields: [slotId], references: [id])
+  slot          Slot          @relation("BookedSlot", fields: [slotId], references: [id], onDelete: Cascade)
   slotId        String
-  client        User          @relation("UserBookings", fields: [clientId], references: [id])
+  client        User          @relation("UserBookings", fields: [clientId], references: [id], onDelete: Cascade)
   clientId      String
-  provider      User          @relation("ProviderBookings", fields: [providerId], references: [id])
+  provider      User          @relation("ProviderBookings", fields: [providerId], references: [id], onDelete: Cascade)
   providerId    String
   review        Review?       @relation("BookingReview")
   finalCost     Decimal       @db.Decimal(10, 2)

@@ -3,7 +3,8 @@ import {
     createBooking,
     getMyBookings,
     cancelBooking,
-    completeBooking
+    completeBooking,
+    getBookingById
 } from '../controllers/booking.controller';
 import { requireAuth, requireRole } from '../middleware/authMiddleware';
 
@@ -404,6 +405,7 @@ router.post('/:id/complete', requireAuth, requireRole('PROVIDER'), completeBooki
  * 
  */
 router.get('/me', requireAuth, getMyBookings);
+router.get('/:id', requireAuth, getBookingById);
 /**
  * @openapi
  * /api/v1/bookings/{id}/cancel:

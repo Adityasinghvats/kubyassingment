@@ -5,7 +5,7 @@ import { ApiError } from "../utils/apiError";
 import { ApiResponse } from "../utils/apiResponse";
 import { auth } from "../utils/auth";
 import { Request, Response } from "express";
-import { Decimal } from "@prisma/client/runtime/library";
+import { Decimal } from "@prisma/client/runtime/client";
 import { CATEGORY } from "../generated/prisma/enums";
 import { deleteResource, uploadResource } from "../utils/cloudinary";
 
