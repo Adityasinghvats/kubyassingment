@@ -65,6 +65,9 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  @@index([role])
+  @@index([category])
+  @@index([rating])
   @@map("users")
 }
 
@@ -78,15 +81,21 @@ model Slot {
   status     SLOTSTATUS @default(AVAILABLE)
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
-  bookings   Booking[]  @relation("BookedSlot")
 
+  @@index([providerId])
+  @@index([status])
+  @@index([startTime])
+  @@index([endTime])
+  @@index([providerId, status]) // Composite index for available slots of provider
   @@map("slots")
 }
 
 model Booking {
   id            String        @id @default(uuid())
-  slot          Slot          @relation("BookedSlot", fields: [slotId], references: [id], onDelete: Cascade)
   slotId        String
+  startTime     DateTime
+  endTime       DateTime
+  duration      Int
   client        User          @relation("UserBookings", fields: [clientId], references: [id], onDelete: Cascade)
   clientId      String
   provider      User          @relation("ProviderBookings", fields: [providerId], references: [id], onDelete: Cascade)
@@ -99,6 +108,13 @@ model Booking {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
+  @@index([clientId])
+  @@index([providerId])
+  @@index([status])
+  @@index([startTime])
+  @@index([slotId])
+  @@index([clientId, status])
+  @@index([providerId, status])
   @@map("bookings")
 }
 
@@ -113,6 +129,8 @@ model Review {
   updatedAt DateTime @updatedAt
 
   @@unique([bookingId])
+  @@index([bookingId])
+  @@index([rating])
   @@map("reviews")
 }
 

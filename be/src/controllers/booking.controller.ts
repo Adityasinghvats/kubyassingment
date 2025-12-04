@@ -8,7 +8,7 @@ import { Decimal } from "@prisma/client/runtime/client";
 
 
 const createBooking = asyncHandler(async (req: Request, res: Response) => {
-    const { slotId, finalCost, description } = req.body;
+    const { slotId, finalCost, description, paymentStatus } = req.body;
 
     if (!slotId) {
         logger.error('Booking creation failed: slotId is required');
@@ -53,24 +53,25 @@ const createBooking = asyncHandler(async (req: Request, res: Response) => {
         // Create booking
         return tx.booking.create({
             data: {
-                slotId,
+                slotId: slot.id,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                duration: slot.duration,
                 clientId: req?.user.id,
                 providerId: slot.providerId,
+                paymentStatus: paymentStatus,
                 finalCost: parsedFinalCost || new Decimal(0),
                 status: 'PENDING',
                 description: description || ''
             },
             include: {
-                slot: {
-                    include: {
-                        user: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                hourlyRate: true
-                            }
-                        }
+                provider: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phoneNumber: true,
+                        hourlyRate: true,
                     }
                 },
                 client: {
@@ -97,14 +98,6 @@ const getMyBookings = asyncHandler(async (req: Request, res: Response) => {
             ? { clientId: req.user.id }
             : { providerId: req.user.id },
         include: {
-            slot: {
-                select: {
-                    startTime: true,
-                    endTime: true,
-                    status: true,
-                    duration: true
-                }
-            },
             client: {
                 select: {
                     id: true,
@@ -165,7 +158,6 @@ const cancelBooking = asyncHandler(async (req: Request, res: Response) => {
             where: { id },
             data: { status: 'CANCELLED' },
             include: {
-                slot: true,
                 client: {
                     select: {
                         id: true,
@@ -197,7 +189,6 @@ const getBookingById = asyncHandler(async (req: Request, res: Response) => {
     const booking = await prisma.booking.findUnique({
         where: { id },
         include: {
-            slot: true,
             client: {
                 select: {
                     id: true,
@@ -244,28 +235,32 @@ const completeBooking = asyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(400, 'Cannot complete a cancelled booking');
     }
 
-    const updatedBooking = await prisma.booking.update({
-        where: { id },
-        data: { status: 'COMPLETED' },
-        include: {
-            slot: true,
-            client: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true
-                }
-            },
-            provider: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    phoneNumber: true
+    const updatedBooking = await prisma.$transaction(async (tx) => {
+        await tx.slot.delete({
+            where: { id: booking.slotId },
+        });
+        await tx.booking.update({
+            where: { id },
+            data: { status: 'COMPLETED' },
+            include: {
+                client: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                provider: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        phoneNumber: true
+                    }
                 }
             }
-        }
-    });
+        })
+    })
 
     res.json(new ApiResponse(200, { booking: updatedBooking }, 'Booking completed successfully'));
 

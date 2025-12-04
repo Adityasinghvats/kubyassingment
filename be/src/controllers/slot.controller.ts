@@ -60,71 +60,74 @@ const getSlots = asyncHandler(async (req: Request<GetSlotsParams, {}, {}, GetSlo
 
     }
 
+    const [availableCount, bookingCount, averageDuration] = await Promise.all([
+        prisma.slot.count({ where: { providerId, status: 'AVAILABLE' } }),
+        prisma.booking.count({ where: { providerId } }),
+        prisma.slot.aggregate({ where: { providerId }, _avg: { duration: true } })
+    ]);
+    const stats = {
+        available: availableCount,
+        booked: bookingCount,
+        averageDuration: averageDuration._avg.duration || 0
+    };
+    const user = await prisma.user.findUnique({
+        where: { id: providerId },
+        select: {
+            id: true,
+            name: true,
+            hourlyRate: true,
+            image: true,
+            rating: true,
+            description: true,
+            address: true,
+            phoneNumber: true,
+            category: true,
+        }
+    });
+
     const slots = await prisma.slot.findMany({
         where: {
             ...(providerId && { providerId }),
             ...(status && { status: status as unknown as any })
-        },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    hourlyRate: true,
-                    image: true,
-                    rating: true,
-                    description: true,
-                    address: true,
-                    phoneNumber: true,
-                    category: true,
-                    _count: {
-                        select: {
-                            slots: { where: { status: 'AVAILABLE' } },
-                            bookingsReceived: true,
-                        }
-                    }
-                }
-            }
         },
         orderBy: {
             startTime: 'asc'
         }
     });
 
-    res.json(new ApiResponse(200, { slots }, 'Slots fetched successfully'));
+    res.json(new ApiResponse(200, { slots, user, stats }, 'Slots fetched successfully'));
 
 });
 
 
 const getMySlots = asyncHandler(async (req: Request, res: Response) => {
+    const [completedCount, cancelledCount, averageDuration] = await Promise.all([
+        prisma.booking.count({ where: { providerId: req.user.id, status: 'COMPLETED' } }),
+        prisma.booking.count({ where: { providerId: req.user.id, status: 'CANCELLED' } }),
+        prisma.slot.aggregate({ where: { providerId: req.user.id }, _avg: { duration: true } })
+    ]);
+    const stats = {
+        completed: completedCount,
+        cancelled: cancelledCount,
+        averageDuration: averageDuration._avg.duration || 0
+    };
+    const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: {
+            id: true,
+        }
+    });
+
     const slots = await prisma.slot.findMany({
         where: {
             providerId: req.user.id
-        },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                }
-            },
-            bookings: {
-                include: {
-                    client: {
-                        select: {
-                            id: true,
-                            name: true,
-                            email: true
-                        }
-                    }
-                }
-            }
         },
         orderBy: {
             startTime: 'desc'
         }
     });
 
-    res.json(new ApiResponse(200, { slots }, 'My slots fetched successfully'));
+    res.json(new ApiResponse(200, { slots, user, stats }, 'My slots fetched successfully'));
 });
 
 

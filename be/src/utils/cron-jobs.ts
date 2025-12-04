@@ -4,6 +4,7 @@ import { logger } from './logger';
 
 const deleteOldSlots = async () => {
     try {
+        await prisma.$connect();
         const result = await prisma.slot.deleteMany({
             where: {
                 endTime: { lt: new Date() }
