@@ -91,22 +91,22 @@ model Slot {
 }
 
 model Booking {
-  id            String        @id @default(uuid())
-  slotId        String
-  startTime     DateTime
-  endTime       DateTime
-  duration      Int
-  client        User          @relation("UserBookings", fields: [clientId], references: [id], onDelete: Cascade)
-  clientId      String
-  provider      User          @relation("ProviderBookings", fields: [providerId], references: [id], onDelete: Cascade)
-  providerId    String
-  review        Review?       @relation("BookingReview")
-  finalCost     Decimal       @db.Decimal(10, 2)
-  paymentStatus Boolean       @default(false)
-  description   String?
-  status        BOOKINGSTATUS @default(PENDING)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id          String          @id @default(uuid())
+  slotId      String
+  startTime   DateTime
+  endTime     DateTime
+  duration    Int
+  client      User            @relation("UserBookings", fields: [clientId], references: [id], onDelete: Cascade)
+  clientId    String
+  provider    User            @relation("ProviderBookings", fields: [providerId], references: [id], onDelete: Cascade)
+  providerId  String
+  review      Review?         @relation("BookingReview")
+  payment     BookingPayment? @relation("BookingPayment")
+  finalCost   Decimal         @db.Decimal(10, 2)
+  description String?
+  status      BOOKINGSTATUS   @default(PENDING)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@index([clientId])
   @@index([providerId])
@@ -116,6 +116,32 @@ model Booking {
   @@index([clientId, status])
   @@index([providerId, status])
   @@map("bookings")
+}
+
+model BookingPayment {
+  id                String    @id @default(uuid())
+  booking           Booking   @relation("BookingPayment", fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId         String    @unique
+  razorpayOrderId   String?   @unique
+  razorpayPaymentId String?   @unique
+  razorpaySignature String?
+  amount            Decimal   @db.Decimal(10, 2)
+  currency          String    @default("INR")
+  status            String    @default("PENDING")
+  paymentMethod     String?
+  paidAt            DateTime?
+  refundedAt        DateTime?
+  refundAmount      Decimal?  @db.Decimal(10, 2)
+  notes             String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([bookingId])
+  @@index([razorpayOrderId])
+  @@index([razorpayPaymentId])
+  @@index([status])
+  @@index([paidAt])
+  @@map("booking_payments")
 }
 
 model Review {

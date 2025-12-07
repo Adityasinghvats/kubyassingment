@@ -47,11 +47,13 @@ app.use(express.urlencoded({ extended: true }));
 import userRoutes from './routes/user.router';
 import slotRoutes from './routes/slot.router';
 import bookingRoutes from './routes/booking.router';
+import paymentRoutes from './routes/payment.router';
 import { startCronJobs } from './utils/cron-jobs';
 
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/slots', slotRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/payments', paymentRoutes);
 
 app.get('/api-docs.json', (req, res) => {
     const baseUrl = process.env.API_BASE_URL || `${req.protocol}://${req.get('host')}`;

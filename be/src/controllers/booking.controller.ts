@@ -98,6 +98,16 @@ const getMyBookings = asyncHandler(async (req: Request, res: Response) => {
             ? { clientId: req.user.id }
             : { providerId: req.user.id },
         include: {
+            payment: {
+                select: {
+                    id: true,
+                    amount: true,
+                    currency: true,
+                    status: true,
+                    paymentMethod: true,
+                    paidAt: true
+                }
+            },
             client: {
                 select: {
                     id: true,
@@ -189,6 +199,16 @@ const getBookingById = asyncHandler(async (req: Request, res: Response) => {
     const booking = await prisma.booking.findUnique({
         where: { id },
         include: {
+            payment: {
+                select: {
+                    id: true,
+                    amount: true,
+                    currency: true,
+                    status: true,
+                    paymentMethod: true,
+                    paidAt: true
+                }
+            },
             client: {
                 select: {
                     id: true,
