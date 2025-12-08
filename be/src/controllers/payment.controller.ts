@@ -66,7 +66,7 @@ const createOrder = asyncHandler(async (req, res) => {
         }
     });
 
-    res.status(201).json(new ApiResponse(201, order, "Order created successfully"));
+    return res.status(201).json(new ApiResponse(201, order, "Order created successfully"));
 });
 
 const validatePayment = asyncHandler(async (req, res) => {
@@ -103,7 +103,7 @@ const validatePayment = asyncHandler(async (req, res) => {
         data: { status: "COMPLETED" }
     });
 
-    res.status(200).json(new ApiResponse(200, { orderId: razorpay_order_id, paymentId: razorpay_payment_id }, "Payment verified successfully"));
+    return res.status(200).json(new ApiResponse(200, { orderId: razorpay_order_id, paymentId: razorpay_payment_id }, "Payment verified successfully"));
 });
 
 export { createOrder, validatePayment };
